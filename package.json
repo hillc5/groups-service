@@ -1,0 +1,30 @@
+{
+  "name": "groups-service",
+  "version": "0.0.1",
+  "description": "Restful Groups API using nodeJS, express and mongoose",
+  "main": "service.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hillc5/groups-service.git"
+  },
+  "keywords": [
+    "RESTful",
+    "nodeJS",
+    "mongoose",
+    "expressJS",
+    "MongoDB"
+  ],
+  "author": "Charlie Hill (charles.a.hill1@gmail.com)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hillc5/groups-service/issues"
+  },
+  "homepage": "https://github.com/hillc5/groups-service#readme",
+  "dependencies": {
+    "express": "^4.14.0",
+    "mongoose": "^4.7.0"
+  }
+}
