@@ -1,11 +1,13 @@
 const { Member } = require('../models/Model'),
-      logger = require('../util/logger');
+      logger = require('../util/logger'),
+
+      DATA_NAME = 'MEMBER_DATA';
 
 
 function saveMember(memberData) {
     const member = new Member(memberData);
 
-    logger.info('Now saving member %s', member.name);
+    logger.info(`${DATA_NAME} - now saving member, ${memberData.name}`);
     return member.save();
 }
 
@@ -16,7 +18,8 @@ function findMember(query, fields, refOptions) {
         memberQuery.populate(option);
     });
 
-    return Promise.resolve(memberQuery.exec());
+    logger.info(`${DATA_NAME} - find member by ${JSON.stringify(query)}`);
+    return memberQuery.exec();
 
 }
 
