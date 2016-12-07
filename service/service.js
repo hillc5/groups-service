@@ -3,8 +3,9 @@ const express = require('express'),
       morgan = require('morgan'),
 
       logger = require('./util/logger'),
-      connect = require('./db')
+      connect = require('./db'),
 
+      groupAPI = require('./api-services/group-api'),
       memberAPI = require('./api-services/member-api');
 
 
@@ -24,5 +25,7 @@ function startService() {
 
     app.post('/member', memberAPI.createMember);
     app.get('/member/:id', memberAPI.findMemberById);
+
+    app.post('/member/:id/group', groupAPI.createGroup);
 }
 

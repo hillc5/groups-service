@@ -8,7 +8,7 @@ function createMember(req, res) {
               memberGroups: [],
               memberPosts: [],
               memberEvents: [],
-              creationDate: new Date()
+              joinDate: Date.now()
           };
 
     memberData.saveMember(newMember).then(result => res.status(201).send(result));
@@ -18,18 +18,19 @@ function findMemberById(req, res) {
     const { id } = req.params;
 
     let query = { _id: id },
+        // remove __v mongoose property
         fields = '-__v',
         groupOptions = {
-            path: 'Group',
-            select: 'name, description, tags, creationDate'
+            path: 'memberGroups',
+            select: 'name description tags creationDate'
         },
         postOptions = {
-            path: 'Post',
-            select: 'title, text, date'
+            path: 'memberPosts',
+            select: 'title text date'
         },
         eventOptions = {
-            path: 'Event',
-            select: 'name, startDate, endDate'
+            path: 'memberEvents',
+            select: 'name startDate endDate'
         },
         refOptions = [ groupOptions, postOptions, eventOptions ];
 

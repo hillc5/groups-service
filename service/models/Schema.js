@@ -15,10 +15,10 @@ const PostSchema = Schema({
     title: { type: String, required: true },
     text: { type: String, required: true },
     owner:  { type: ObjectId, ref: 'Member' },
+    group: { type: ObjectId, ref: 'Group' },
     replies: [ { type: ObjectId, ref: 'Post' } ],
-    date: Date
+    postDate: Date
 });
-
 
 const EventSchema = Schema({
     name: { type: String, required: true },
@@ -40,7 +40,7 @@ const GroupSchema = Schema({
     tags: [ String ],
     creationDate: Date,
     lastUpdated: Date,
-    owner: { type: ObjectId, ref: 'Member' }
+    owner: { type: ObjectId, ref: 'Member', required: true }
 });
 
 module.exports = {
