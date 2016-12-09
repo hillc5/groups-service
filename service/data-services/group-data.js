@@ -23,6 +23,18 @@ function saveGroup(groupData) {
             });
 }
 
+function findGroup(query, fields, refOptions) {
+    let groupQuery = Group.findOne(query).select(fields);
+
+    refOptions.forEach(option => {
+        groupQuery.populate(option);
+    });
+
+    logger.info(`${DATA_NAME} - find group by ${JSON.stringify(query)}`);
+    return groupQuery.exec();
+}
+
 module.exports = {
-    saveGroup
+    saveGroup,
+    findGroup
 };

@@ -1,4 +1,5 @@
 const express = require('express'),
+      expressValidator = require('express-validator'),
       bodyParser = require('body-parser'),
       morgan = require('morgan'),
 
@@ -23,9 +24,13 @@ function startService() {
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
 
+    // Adds validation methods to req object
+    app.use(expressValidator());
+
     app.post('/member', memberAPI.createMember);
     app.get('/member/:id', memberAPI.findMemberById);
 
     app.post('/member/:id/group', groupAPI.createGroup);
+    app.get('/group/:id', groupAPI.findGroupById);
 }
 
