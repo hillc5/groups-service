@@ -31,6 +31,7 @@ function startService() {
     app.get('/member/:id', memberAPI.findMemberById);
 
     app.post('/member/:id/group', groupAPI.createGroup);
+    app.get('/member/:id/group', groupAPI.getAllMemberGroups);
     app.get('/group/:id', groupAPI.findGroupById);
 }
 

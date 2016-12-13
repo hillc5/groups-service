@@ -1,4 +1,6 @@
-const groupData = require('../data-services/group-data');
+const groupData = require('../data-services/group-data'),
+      mongoose = require('mongoose'),
+      { createValidationSchema, sendError } = require('../util/validation');
 
 function createGroup(req, res) {
     const { id: ownerId } = req.params,
@@ -17,14 +19,47 @@ function createGroup(req, res) {
         .catch(sendError(res));
 }
 
-function findGroupById(req, res) {
-    const validationSchema = {
-        'id': {
-            isMongoId: {
-                errorMessage: 'Id must be a valid MongoDB ObjectId'
+function getAllMemberGroups(req, res) {
+    const validationSchema = createValidationSchema([ 'id' ]);
+
+    req.sanitize('id').trim();
+    req.checkParams(validationSchema);
+
+    req.getValidationResult()
+        .then(result => result.throw())
+        .then(() => {
+            const { id } = req.params,
+                  query = { owner: mongoose.mongo.ObjectId(id) },
+                  fields = '-__v',
+                  membersOptions = {
+                      path: 'members'
+                  },
+                  eventsOptions = {
+                      path: 'events'
+                  },
+                  postsOptions = {
+                      path: 'posts'
+                  },
+                  ownerOptions = {
+                      path: 'owner'
+                  },
+                  refOptions = [ membersOptions, eventsOptions, postsOptions, ownerOptions ];
+
+            return groupData.findGroup(query, fields, refOptions);
+        })
+        .then(result => {
+            if (result) {
+                res.status(200).send(result);
+            } else {
+                throw { status: 404, message: `No groups found for owner: ${req.params.id}` };
             }
-        }
-    };
+
+        })
+        .catch(sendError(res));
+}
+
+function findGroupById(req, res) {
+    const validationSchema = createValidationSchema([ 'id' ]);
 
     req.sanitize('id').trim();
     req.checkParams(validationSchema);
@@ -56,21 +91,19 @@ function findGroupById(req, res) {
 
             return groupData.findGroup(query, fields, refOptions);
         })
-        .then(result => res.status(200).send(result))
-        .catch(sendError(res));
-}
+        .then(result => {
+            if (result) {
+                res.status(200).send(result);
+            } else {
+                throw { status: 404, message: `No group found with ${req.params.id}` };
+            }
 
-function sendError(res) {
-    return (err) => {
-        if (err && err.mapped) {
-            res.status(400).send(err.mapped());
-        } else {
-            res.status(err.status).send(err);
-        }
-    };
+        })
+        .catch(sendError(res));
 }
 
 module.exports = {
     createGroup,
-    findGroupById
+    findGroupById,
+    getAllMemberGroups
 };

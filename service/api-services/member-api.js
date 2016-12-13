@@ -1,18 +1,8 @@
-const memberData = require('../data-services/member-data');
+const memberData = require('../data-services/member-data'),
+      { createValidationSchema, sendError } = require('../util/validation');
 
 function createMember(req, res) {
-    const validationSchema = {
-        'name': {
-            notEmpty: true,
-            errorMessage: 'Member name is required'
-
-        },
-        'email': {
-            isEmail: {
-                errorMessage: 'A valid email address is required'
-            }
-        }
-    }
+    const validationSchema = createValidationSchema([ 'name', 'email' ]);
 
     req.sanitize('name').trim();
     req.sanitize('email').trim();
@@ -41,13 +31,7 @@ function createMember(req, res) {
 }
 
 function findMemberById(req, res) {
-    const validationSchema = {
-        'id': {
-            isMongoId: {
-                errorMessage: 'Id must be a valid MongoDB ObjectId'
-            }
-        }
-    };
+    const validationSchema = createValidationSchema([ 'id' ]);
 
     req.sanitize('id').trim();
     req.checkParams(validationSchema);
@@ -77,19 +61,13 @@ function findMemberById(req, res) {
             return memberData.findMember(query, fields, refOptions)
         })
         .then(result => {
-            res.status(200).send(result)
+            if (result) {
+                res.status(200).send(result);
+            } else {
+                throw { status: 404, message: `No member found with id ${req.params.id}` }
+            }
         })
         .catch(sendError(res));
-}
-
-function sendError(res) {
-    return (err) => {
-         if (err && err.mapped) {
-            res.status(400).send(err.mapped());
-        } else {
-            res.status(err.status).send(err);
-        }
-    }
 }
 
 module.exports = {
