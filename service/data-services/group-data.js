@@ -24,7 +24,7 @@ function saveGroup(groupData) {
 }
 
 function findGroup(query, fields, refOptions) {
-    let groupQuery = Group.findOne(query).select(fields);
+    let groupQuery = Group.find(query).select(fields);
 
     refOptions.forEach(option => {
         groupQuery.populate(option);

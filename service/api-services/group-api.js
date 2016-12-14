@@ -81,7 +81,11 @@ function findGroupById(req, res) {
                   },
                   postsOptions = {
                       path: 'posts',
-                      select: 'title text owner postDate replies'
+                      select: 'title text owner postDate replies',
+                      populate: {
+                        path: 'owner',
+                        select: 'name'
+                      }
                   },
                   ownerOptions = {
                       path: 'owner',
@@ -102,8 +106,43 @@ function findGroupById(req, res) {
         .catch(sendError(res));
 }
 
+function findGroupsByTags(req, res) {
+    const { tags } = req.query,
+          query = { tags: { $in : tags }},
+          // remove __v mongoose property
+          fields = '-__v',
+          membersOptions = {
+              path: 'members',
+              select: 'name'
+          },
+          eventsOptions = {
+              path: 'events',
+              select: 'name invitees attendees startDate endDate'
+          },
+          postsOptions = {
+              path: 'posts',
+              select: 'title text owner postDate replies'
+          },
+          ownerOptions = {
+              path: 'owner',
+              select: 'name email joinDate'
+          },
+          refOptions = [ membersOptions, eventsOptions, postsOptions, ownerOptions ];
+
+    groupData.findGroup(query, fields, refOptions)
+        .then(result => {
+            if (result) {
+                res.status(200).send(result);
+            } else {
+                throw { status: 404, message: `No group found with ${req.query.tags}` };
+            }
+        })
+        .catch(sendError(res));
+}
+
 module.exports = {
     createGroup,
     findGroupById,
+    findGroupsByTags,
     getAllMemberGroups
 };
