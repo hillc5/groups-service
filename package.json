@@ -5,7 +5,7 @@
   "main": "service.js",
   "scripts": {
     "service": "NODE_ENV=dev node ./service/service.js | ./node_modules/.bin/bunyan",
-    "test": "NODE_ENV=test mocha"
+    "test": "NODE_ENV=test mocha --recursive"
   },
   "repository": {
     "type": "git",
