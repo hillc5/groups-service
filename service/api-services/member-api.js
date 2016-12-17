@@ -1,8 +1,9 @@
 const memberData = require('../data-services/member-data'),
-      { createValidationSchema, sendError } = require('../util/validation');
+      { createValidationSchema, sendError } = require('../util/validation'),
+      validationType = 'member';
 
 function createMember(req, res) {
-    const validationSchema = createValidationSchema([ 'name', 'email' ]);
+    const validationSchema = createValidationSchema(validationType, [ 'name', 'email' ]);
 
     req.sanitize('name').trim();
     req.sanitize('email').trim();
@@ -31,7 +32,7 @@ function createMember(req, res) {
 }
 
 function findMemberById(req, res) {
-    const validationSchema = createValidationSchema([ 'id' ]);
+    const validationSchema = createValidationSchema(validationType, [ 'id' ]);
 
     req.sanitize('id').trim();
     req.checkParams(validationSchema);
@@ -46,7 +47,27 @@ function findMemberById(req, res) {
                   fields = '-__v',
                   groupOptions = {
                       path: 'memberGroups',
-                      select: 'name description tags creationDate'
+                      select: '-__v',
+                      populate: [
+                          {
+                              path: 'owner',
+                              select: 'name'
+                          },
+                          {
+                              path: 'members',
+                              select: 'name'
+                          },
+                          {
+                              path: 'posts',
+                              select: 'title text postDate',
+                              options: { sort: { postDate: -1}, limit: 10 }
+                          },
+                          {
+                              path: 'events',
+                              select: 'name invitees attendees startDate endDate',
+                              options: { sort: { startDate: -1 }, limit: 10 }
+                          }
+                      ]
                   },
                   postOptions = {
                       path: 'memberPosts',

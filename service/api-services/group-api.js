@@ -1,51 +1,86 @@
 const groupData = require('../data-services/group-data'),
       mongoose = require('mongoose'),
-      { createValidationSchema, sendError } = require('../util/validation');
+      { validateRequest, sendError } = require('../util/validation'),
+      validationType = 'group';
 
 function createGroup(req, res) {
-    const { id: ownerId } = req.params,
-          { name, description, tags, isPublic } = req.body,
-          newGroup = {
-              name,
-              description,
-              tags: tags.split(',').map(tag => tag.trim()),
-              owner: ownerId,
-              isPublic,
-              creationDate: Date.now()
-          };
+    const paramOptions = [ 'id' ],
+          bodyOptions = [ 'name', 'isPublic' ],
+          validationType = 'group';
 
-    groupData.saveGroup(newGroup)
+    validateRequest({ req, paramOptions, bodyOptions })
+        .then(() => {
+            const { id: owner } = req.params,
+                  { name, description, tags, isPublic } = req.body,
+
+                  newGroup = {
+                     name,
+                     description,
+                     tags: tags.split(',').map(tag => tag.trim()),
+                     owner,
+                     isPublic,
+                     creationDate: Date.now()
+                  };
+
+            return groupData.saveGroup(newGroup)
+        })
         .then(result => res.status(201).send(result))
         .catch(sendError(res));
 }
 
+function addMemberToGroup(req, res) {
+    const paramOptions = [ 'id', 'memberId' ],
+          validationType = 'group';
+
+    validateRequest({ req, validationType, paramOptions })
+        .then(() => {
+            const { id, memberId } = req.params;
+            return groupData.addMemberToGroup(id, memberId);
+        })
+        .then(result => {
+            if (result) {
+                res.status(200).send(result);
+            } else {
+                throw { status: 500, message: 'There was an error' }
+            }
+        })
+        .catch(sendError(res));
+}
+
 function getAllMemberGroups(req, res) {
-    const validationSchema = createValidationSchema([ 'id' ]);
+    const paramOptions = [ 'id' ],
+          validationType = 'group';
 
-    req.sanitize('id').trim();
-    req.checkParams(validationSchema);
-
-    req.getValidationResult()
-        .then(result => result.throw())
+    validateRequest({ req, validationType, paramOptions })
         .then(() => {
             const { id } = req.params,
                   query = { owner: mongoose.mongo.ObjectId(id) },
                   fields = '-__v',
                   membersOptions = {
-                      path: 'members'
+                      path: 'members',
+                      select: 'name email joinDate'
                   },
                   eventsOptions = {
-                      path: 'events'
+                      path: 'events',
+                      populate: {
+                          path: 'creator',
+                          select: 'name'
+                      }
                   },
                   postsOptions = {
-                      path: 'posts'
+                      path: 'posts',
+                      populate: {
+                          path: 'owner',
+                          select: 'name'
+                      }
                   },
                   ownerOptions = {
-                      path: 'owner'
+                      path: 'owner',
+                      select: 'name email joinDate'
                   },
                   refOptions = [ membersOptions, eventsOptions, postsOptions, ownerOptions ];
 
-            return groupData.findGroup(query, fields, refOptions);
+            return groupData.findGroups(query, fields, refOptions);
         })
         .then(result => {
             if (result) {
@@ -59,13 +94,10 @@ function getAllMemberGroups(req, res) {
 }
 
 function findGroupById(req, res) {
-    const validationSchema = createValidationSchema([ 'id' ]);
+    const paramOptions = [ 'id' ],
+          validationType = 'group';
 
-    req.sanitize('id').trim();
-    req.checkParams(validationSchema);
-
-    req.getValidationResult()
-        .then(result => result.throw())
+    validateRequest({ req, validationType, paramOptions })
         .then(() => {
             const { id } = req.params,
                   query = { _id: id },
@@ -77,14 +109,18 @@ function findGroupById(req, res) {
                   },
                   eventsOptions = {
                       path: 'events',
-                      select: 'name invitees attendees startDate endDate'
+                      select: 'name invitees attendees startDate endDate',
+                      populate: {
+                          path: 'creator',
+                          select: 'name'
+                      }
                   },
                   postsOptions = {
                       path: 'posts',
                       select: 'title text owner postDate replies',
                       populate: {
-                        path: 'owner',
-                        select: 'name'
+                          path: 'owner',
+                          select: 'name'
                       }
                   },
                   ownerOptions = {
@@ -129,7 +165,7 @@ function findGroupsByTags(req, res) {
           },
           refOptions = [ membersOptions, eventsOptions, postsOptions, ownerOptions ];
 
-    groupData.findGroup(query, fields, refOptions)
+    groupData.findGroups(query, fields, refOptions)
         .then(result => {
             if (result) {
                 res.status(200).send(result);
@@ -142,6 +178,7 @@ function findGroupsByTags(req, res) {
 
 module.exports = {
     createGroup,
+    addMemberToGroup,
     findGroupById,
     findGroupsByTags,
     getAllMemberGroups

@@ -4,7 +4,8 @@
   "description": "Restful Groups API using nodeJS, express and mongoose",
   "main": "service.js",
   "scripts": {
-    "service": "node ./service/service.js | ./node_modules/.bin/bunyan"
+    "service": "NODE_ENV=dev node ./service/service.js | ./node_modules/.bin/bunyan",
+    "test": "NODE_ENV=test mocha"
   },
   "repository": {
     "type": "git",
@@ -26,9 +27,17 @@
   "dependencies": {
     "body-parser": "^1.15.2",
     "bunyan": "^1.8.5",
+    "config": "^1.24.0",
     "express": "^4.14.0",
     "express-validator": "^3.0.0",
     "mongoose": "^4.7.0",
     "morgan": "^1.7.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-http": "^3.0.0",
+    "config": "^1.24.0",
+    "js-yaml": "^3.7.0",
+    "mocha": "^3.2.0"
   }
 }

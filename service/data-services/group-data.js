@@ -23,12 +23,38 @@ function saveGroup(groupData) {
             });
 }
 
-function findGroup(query, fields, refOptions) {
-    let groupQuery = Group.find(query).select(fields);
+function addMemberToGroup(groupId, memberId) {
+    const query = { _id: groupId },
+          update = { $addToSet: { members: memberId }},
+          options = { new: true };
 
-    refOptions.forEach(option => {
-        groupQuery.populate(option);
-    });
+    return Group.findOneAndUpdate(query, update, options).exec()
+            .then(group => {
+                if (!group) {
+                    throw { status: 404, message: `No group found for id: ${groupId}` };
+                }
+                const memberQuery = { _id: memberId },
+                      memberUpdate = { $addToSet: { memberGroups: groupId }};
+
+                Member.findOneAndUpdate(memberQuery, memberUpdate).exec();
+                return group;
+            });
+}
+
+function findGroups(query, fields, refOptions) {
+    let groupQuery = Group.find(query)
+                        .select(fields)
+                        .populate(refOptions);
+
+
+    logger.info(`${DATA_NAME} - find groups by ${JSON.stringify(query)}`);
+    return groupQuery.exec();
+}
+
+function findGroup(query, fields, refOptions) {
+    let groupQuery = Group.findOne(query)
+                        .select(fields)
+                        .populate(refOptions);
 
     logger.info(`${DATA_NAME} - find group by ${JSON.stringify(query)}`);
     return groupQuery.exec();
@@ -36,5 +62,7 @@ function findGroup(query, fields, refOptions) {
 
 module.exports = {
     saveGroup,
-    findGroup
+    addMemberToGroup,
+    findGroup,
+    findGroups
 };

@@ -14,15 +14,17 @@ const MemberSchema = Schema({
 const PostSchema = Schema({
     title: { type: String, required: true },
     text: { type: String, required: true },
-    owner:  { type: ObjectId, ref: 'Member' },
-    group: { type: ObjectId, ref: 'Group' },
+    owner:  { type: ObjectId, ref: 'Member', required: true },
+    group: { type: ObjectId, ref: 'Group', required: true },
+    event: { type: ObjectId, ref: 'Event' },
     replies: [ { type: ObjectId, ref: 'Post' } ],
     postDate: Date
 });
 
 const EventSchema = Schema({
     name: { type: String, required: true },
-    group: { type: ObjectId, ref: 'Group' },
+    group: { type: ObjectId, ref: 'Group', required: true },
+    creator: { type: ObjectId, ref: 'Member', required: true },
     invitees: [ { type: ObjectId, ref: 'Member' } ],
     attendees: [ { type: ObjectId, ref: 'Member' } ],
     posts: [ { type: ObjectId, ref: 'Post' } ],

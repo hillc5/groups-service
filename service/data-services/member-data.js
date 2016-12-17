@@ -12,15 +12,13 @@ function saveMember(memberData) {
 }
 
 function findMember(query, fields, refOptions) {
-    let memberQuery = Member.findOne(query).select(fields);
+    let memberQuery = Member.findOne(query)
+                        .select(fields)
+                        .populate(refOptions);
 
-    refOptions.forEach(option => {
-        memberQuery.populate(option);
-    });
 
     logger.info(`${DATA_NAME} - find member by ${JSON.stringify(query)}`);
     return memberQuery.exec();
-
 }
 
 module.exports = {
