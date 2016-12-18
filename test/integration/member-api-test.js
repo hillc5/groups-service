@@ -5,18 +5,13 @@ const mongoose = require('mongoose'),
       chaiHttp = require('chai-http'),
 
       service = require('../../service/service'),
-      should = chai.should()
       expect = chai.expect;
 
 chai.use(chaiHttp);
 
 describe('member-api', () => {
 
-    beforeEach(done => {
-        Member.remove({}).then(done());
-    });
-
-    after(done => {
+    afterEach(done => {
         Member.remove({}).then(done());
     });
 
@@ -78,7 +73,7 @@ describe('member-api', () => {
                 .post('/member')
                 .send(newMember)
                 .then(res => {
-                    res.should.have.status(201);
+                    expect(res.status).to.be.eql(201);
                     done();
             });
         });
@@ -111,7 +106,7 @@ describe('member-api', () => {
         });
     });
 
-    describe('#getMember', () => {
+    describe('#findMemberById', () => {
         it('should return 400 if invalid id sent', done => {
             chai.request(service)
                 .get('/member/wrongID')

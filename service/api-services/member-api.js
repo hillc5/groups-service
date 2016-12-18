@@ -1,17 +1,12 @@
 const memberData = require('../data-services/member-data'),
-      { createValidationSchema, sendError } = require('../util/validation'),
+      { sendError, validateRequest } = require('../util/validation'),
       validationType = 'member';
 
 function createMember(req, res) {
-    const validationSchema = createValidationSchema(validationType, [ 'name', 'email' ]);
+    const bodyOptions = [ 'name', 'email' ],
+          validationType = 'member';
 
-    req.sanitize('name').trim();
-    req.sanitize('email').trim();
-
-    req.checkBody(validationSchema);
-
-    req.getValidationResult()
-        .then(result => result.throw())
+    validateRequest({ req, validationType, bodyOptions })
         .then(() => {
             const { name, email } = req.body,
             newMember = {
@@ -23,23 +18,19 @@ function createMember(req, res) {
                 joinDate: Date.now()
             };
 
-            return memberData.saveMember(newMember)
+            return memberData.saveMember(newMember);
         })
         .then(result => {
-            res.status(201).send(result)
+            res.status(201).send(result);
         })
         .catch(sendError(res));
 }
 
 function findMemberById(req, res) {
-    const validationSchema = createValidationSchema(validationType, [ 'id' ]);
+    const paramOptions = [ 'id' ],
+          validationType = 'member';
 
-    req.sanitize('id').trim();
-    req.checkParams(validationSchema);
-
-    req.getValidationResult()
-        // result.throw only throws error if they are on result
-        .then(result => result.throw())
+    validateRequest({ req, paramOptions, validationType })
         .then(() => {
             const { id } = req.params,
                   query = { _id: id },
