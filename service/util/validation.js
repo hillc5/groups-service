@@ -24,7 +24,7 @@ function validateRequest({ req, validationType, paramOptions=[], bodyOptions=[] 
     const paramValidationSchema = createValidationSchema(validationType, paramOptions),
           bodyValidationSchema = createValidationSchema(validationType, bodyOptions);
 
-    // trim ALL the options!
+    // trim ALL the things!
     [ ...paramOptions, ...bodyOptions ].forEach(option => {
         req.sanitize(option).trim();
     });
@@ -32,7 +32,7 @@ function validateRequest({ req, validationType, paramOptions=[], bodyOptions=[] 
     req.checkParams(paramValidationSchema);
     req.checkBody(bodyValidationSchema);
 
-    // result.throw() only throws an error if there is an actual error apparent on the result
+    // result.throw() only throws an error if there is an actual error present on the result
     return req.getValidationResult().then(result => result.throw());
 }
 
