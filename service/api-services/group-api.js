@@ -16,6 +16,7 @@ function createGroup(req, res) {
                   newGroup = {
                      name,
                      description,
+                     members: [ owner ],
                      tags: tags && tags.split(',').map(tag => tag.trim()),
                      owner,
                      isPublic,

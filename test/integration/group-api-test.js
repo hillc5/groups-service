@@ -1,5 +1,6 @@
 const mongoose = require('mongoose'),
       { Member, Group } = require('../../service/models/Model'),
+      { saveTestMember, saveTestGroup, testGroupData, testMemberData } = require('../util/test-helpers'),
 
       chai = require('chai'),
       chaiHttp = require('chai-http'),
@@ -11,7 +12,8 @@ chai.use(chaiHttp);
 
 describe('group-api', () => {
     afterEach(done => {
-        Member.remove({})
+        Member
+            .remove({})
             .then(() => Group.remove({}))
             .then(done());
     });
@@ -90,22 +92,12 @@ describe('group-api', () => {
             const newGroup = {
                       name: 'Test',
                       isPublic: true
-                  },
-                  memberData = {
-                      name: 'Test',
-                      email: 'Test@test.com',
-                      memberGroups: [],
-                      memberPosts: [],
-                      memberEvents: [],
-                      tags: 'test, testing, fun',
-                      joinDate: Date.now()
-                  },
-                  member = new Member(memberData);
+                  };
 
-            member.save()
-                .then(result => {
+            saveTestMember()
+                .then(member => {
                     return chai.request(service)
-                        .post(`/member/${result._id}/group`)
+                        .post(`/member/${member._id}/group`)
                         .send(newGroup)
                 })
                 .then(res => {
@@ -118,25 +110,15 @@ describe('group-api', () => {
             const newGroup = {
                       name: 'Test',
                       isPublic: true
-                  },
-                  memberData = {
-                      name: 'Test',
-                      email: 'Test@test.com',
-                      memberGroups: [],
-                      memberPosts: [],
-                      memberEvents: [],
-                      tags: 'test, testing, fun',
-                      joinDate: Date.now()
-                  },
-                  member = new Member(memberData);
+                  };
 
             let ownerId;
 
-            member.save()
-                .then(result => {
-                    ownerId = result._id;
+            saveTestMember()
+                .then(member => {
+                    ownerId = member._id;
                     return chai.request(service)
-                        .post(`/member/${result._id}/group`)
+                        .post(`/member/${ownerId}/group`)
                         .send(newGroup)
                 })
                 .then(res => {
@@ -147,29 +129,42 @@ describe('group-api', () => {
                 });
         });
 
+        it('should add the owner to the members array', done => {
+            const newGroup = {
+                    name: 'Test',
+                    isPublic: true
+                };
+
+            let ownerId;
+
+            saveTestMember()
+                .then(member => {
+                    ownerId = member._id;
+                    return chai.request(service)
+                            .post(`/member/${ownerId}/group`)
+                            .send(newGroup);
+                })
+                .then(res => {
+                    const { owner, members } = res.body;
+                    expect(members[0]).to.be.eql(owner);
+                    done();
+                })
+        })
+
         it('should return the full group on successful creation', done => {
             const newGroup = {
                       name: 'Test',
                       isPublic: true
-                  },
-                  memberData = {
-                      name: 'Test',
-                      email: 'Test@test.com',
-                      memberGroups: [],
-                      memberPosts: [],
-                      memberEvents: [],
-                      joinDate: Date.now()
-                  },
-                  member = new Member(memberData);
+                  };
 
             let ownerId;
 
-            member.save()
-                .then(result => {
-                    ownerId = result._id;
+            saveTestMember()
+                .then(member => {
+                    ownerId = member._id;
                     return chai.request(service)
-                        .post(`/member/${result._id}/group`)
-                        .send(newGroup)
+                        .post(`/member/${ownerId}/group`)
+                        .send(newGroup);
                 })
                 .then(res => {
                     const { _id, __v, owner, name, isPublic, description, members, events, posts, tags, creationDate } = res.body;
@@ -180,7 +175,7 @@ describe('group-api', () => {
                     expect(isPublic).to.be.eql(newGroup.isPublic);
                     expect(description).to.be.a('string');
                     expect(members).to.be.an('array');
-                    expect(members.length).to.be.eql(0);
+                    expect(members.length).to.be.eql(1);
                     expect(posts).to.be.an('array');
                     expect(posts.length).to.be.eql(0);
                     expect(events).to.be.an('array');
@@ -192,28 +187,49 @@ describe('group-api', () => {
                 });
         });
 
+        it('should add the group id to the owner memberGroups array', done => {
+            const newGroup = {
+                name: 'Test',
+                isPublic: true
+            };
+
+            let groupId,
+                ownerId;
+
+            saveTestMember()
+                .then(member => {
+                    ownerId = member._id;
+                    return chai.request(service)
+                            .post(`/member/${ownerId}/group`)
+                            .send(newGroup);
+                })
+                .then(result => {
+                    groupId = result.body._id;
+                    return Member.findOne({ _id: ownerId }).select('memberGroups').exec();
+                })
+                .then(member => {
+                    const memberGroupId = member.memberGroups[0],
+                          foundMemberId = member._id;
+
+                    expect(foundMemberId).to.be.eql(ownerId);
+                    expect(memberGroupId).to.be.eql(mongoose.mongo.ObjectId(groupId));
+                    done();
+                })
+        });
+
         it('should create an empty array for tags when no tags are supplied', done => {
             const newGroup = {
                 name: 'Test',
                 isPublic: true
-            },
-            memberData = {
-                name: 'Test',
-                email: 'Test@test.com',
-                memberGroups: [],
-                memberPosts: [],
-                memberEvents: [],
-                joinDate: Date.now()
-            },
-            member = new Member(memberData);
+            };
 
             let ownerId;
 
-            member.save()
-                .then(result => {
-                    ownerId = result._id;
+            saveTestMember()
+                .then(member => {
+                    ownerId = member._id;
                     return chai.request(service)
-                        .post(`/member/${result._id}/group`)
+                        .post(`/member/${ownerId}/group`)
                         .send(newGroup)
                 })
                 .then(res => {
@@ -229,24 +245,15 @@ describe('group-api', () => {
                 name: 'Test',
                 isPublic: true,
                 tags: 'one, two, three'
-            },
-            memberData = {
-                name: 'Test',
-                email: 'Test@test.com',
-                memberGroups: [],
-                memberPosts: [],
-                memberEvents: [],
-                joinDate: Date.now()
-            },
-            member = new Member(memberData);
+            };
 
             let ownerId;
 
-            member.save()
-                .then(result => {
-                    ownerId = result._id;
+            saveTestMember()
+                .then(member => {
+                    ownerId = member._id;
                     return chai.request(service)
-                        .post(`/member/${result._id}/group`)
+                        .post(`/member/${ownerId}/group`)
                         .send(newGroup)
                 })
                 .then(res => {
@@ -256,6 +263,281 @@ describe('group-api', () => {
                     expect(tags.includes('one')).to.be.true;
                     expect(tags.includes('two')).to.be.true;
                     expect(tags.includes('three')).to.be.true;
+                    done();
+                });
+        });
+    });
+
+    describe('#addMemberToGroup', () => {
+        it('should return 400 for incorrect groupId', done => {
+            chai.request(service)
+                .post(`/group/wrongId/member/5848ed108b3ccb3ffcc691d`)
+                .then(result => {
+                    // Fail if we hit this spot
+                    expect(false).to.be.true;
+                    done();
+                })
+                .catch(err => {
+                    expect(err.status).to.be.eql(400);
+                    done();
+                });
+        });
+
+        it('should return 400 for incorrect memberId', done => {
+            chai.request(service)
+                .post(`/group/5848ed108b3ccb3ffcc691d/member/wrongId`)
+                .then(result => {
+                    // Fail if we hit this spot
+                    expect(false).to.be.true;
+                    done();
+                })
+                .catch(err => {
+                    expect(err.status).to.be.eql(400);
+                    done();
+                });
+        });
+
+        it('should return 200 for successful save', done => {
+            let memberId;
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+                    return saveTestGroup();
+                })
+                .then(group => {
+                    return chai.request(service)
+                            .post(`/group/${group._id}/member/${memberId}`);
+                })
+                .then(result => {
+                    expect(result.status).to.be.eql(200);
+                    done();
+                });
+        })
+
+        it('should return the group with the member added in the members array', done => {
+            let memberId;
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+                    return saveTestGroup();
+                })
+                .then(group => {
+                    return chai.request(service)
+                            .post(`/group/${group._id}/member/${memberId}`);
+                })
+                .then(result => {
+                    const { members } = result.body;
+                    expect(members.length).to.be.eql(1);
+                    expect(mongoose.mongo.ObjectId(members[0])).to.be.eql(memberId);
+                    done();
+                });
+        });
+
+        it('should add the groupId to the members memberGroups array', done => {
+            let groupId,
+                memberId;
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+                    return saveTestGroup();
+                })
+                .then(group => {
+                    groupId = group._id;
+                    return chai.request(service)
+                        .post(`/group/${groupId}/member/${memberId}`);
+                })
+                .then(() => {
+                    return Member.findOne({ _id: memberId }).exec();
+                })
+                .then(member => {
+                    expect(member.memberGroups[0]).to.be.eql(groupId);
+                    done();
+                });
+        });
+    });
+
+    describe('#getAllMemberGroups', () => {
+        it('should return 400 when the member id is invalid', done => {
+            chai.request(service)
+                .post(`/member/wrongId/group`)
+                .then(result => {
+                     // Fail if we hit this spot
+                    expect(false).to.be.true;
+                    done();
+                })
+                .catch(err => {
+                    expect(err.status).to.be.eql(400);
+                    done();
+                });
+        });
+
+        it('should return 200 on success', done => {
+            saveTestGroup()
+                .then(group => {
+                    return chai.request(service)
+                            .get(`/member/${group.owner}/group`);
+                })
+                .then(result => {
+                    expect(result.status).to.be.eql(200);
+                    done();
+                });
+        });
+
+        it('should return all member groups', done => {
+            let memberId,
+                groupData = {
+                    name: 'Test Group',
+                    isPublic: true
+                };
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+                    return chai.request(service)
+                            .post(`/member/${memberId}/group`)
+                            .send(groupData);
+                })
+                .then(result => {
+                    return chai.request(service)
+                            .post(`/member/${memberId}/group`)
+                            .send(groupData);
+                })
+                .then(result => {
+                    return chai.request(service)
+                            .get(`/member/${memberId}/group`);
+                })
+                .then(result => {
+                    const groups = result.body;
+                    expect(groups.length).to.be.eql(2);
+                    expect(groups[0]._id).to.not.be.eql(groups[1]._id);
+                    done();
+                });
+        });
+
+        it('should only return groups for the given ownerId', done => {
+            let memberId,
+                groupData = {
+                    name: 'Test Group',
+                    isPublic: true
+                };
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+                    return chai.request(service)
+                            .post(`/member/${memberId}/group`)
+                            .send(groupData);
+                })
+                .then(result => {
+                    return chai.request(service)
+                            .post(`/member/${memberId}/group`)
+                            .send(groupData);
+                })
+                .then(result => {
+                    return chai.request(service)
+                            .post(`/member/${memberId}/group`)
+                            .send(groupData);
+                })
+                .then(result => {
+                    return chai.request(service)
+                            .get(`/member/${memberId}/group`);
+                })
+                .then(result => {
+                    const groups = result.body;
+                    expect(groups.length).to.be.eql(3);
+                    groups.forEach(group => {
+                        expect(mongoose.mongo.ObjectId(group.owner._id)).to.be.eql(memberId);
+                    });
+                    done();
+                });
+        });
+
+        it('should return the number of groups the owner has in their groups array', done => {
+            let memberId,
+                numGroups,
+                groupData = {
+                    name: 'Test Group',
+                    isPublic: true
+                };
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+                    return chai.request(service)
+                            .post(`/member/${memberId}/group`)
+                            .send(groupData);
+                })
+                .then(result => {
+                    return chai.request(service)
+                            .post(`/member/${memberId}/group`)
+                            .send(groupData);
+                })
+                .then(result => {
+                    return chai.request(service)
+                            .post(`/member/${memberId}/group`)
+                            .send(groupData);
+                })
+                .then(result => {
+                    return chai.request(service)
+                            .get(`/member/${memberId}/group`);
+                })
+                .then(result => {
+                    const groups = result.body;
+                    numGroups = groups.length;
+                    expect(numGroups).to.be.eql(3);
+                    groups.forEach(group => {
+                        expect(mongoose.mongo.ObjectId(group.owner._id)).to.be.eql(memberId);
+                    });
+                    return chai.request(service)
+                            .get(`/member/${memberId}`);
+                })
+                .then(result => {
+                    const { memberGroups } = result.body;
+                    expect(memberGroups.length).to.be.eql(numGroups);
+                    done();
+                });
+        });
+
+        it('should return an empty array if a valid member has no groups', done => {
+            saveTestMember()
+                .then(member => {
+                    return chai.request(service)
+                            .get(`/member/${member._id}/group`);
+                })
+                .then(result => {
+                    expect(result.body).to.be.an('array');
+                    expect(result.body.length).to.be.eql(0);
+                    done();
+                });
+        });
+
+        it('should return the name, email, and joinDate of each member', done => {
+            const groupData = {
+                      name: 'Test',
+                      isPublic: true
+                  };
+
+            let memberId;
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+                    return chai.request(service)
+                            .post(`/member/${memberId}/group`)
+                            .send(groupData);
+                })
+                .then(response => {
+                    return chai.request(service)
+                            .get(`/member/${memberId}/group`);
+                })
+                .then(response => {
+                    const { owner } = response.body[0];
+                    expect(owner.name).to.be.eql(testMemberData.name);
+                    expect(owner.email).to.be.eql(testMemberData.email);
+                    expect(owner.joinDate).to.not.be.undefined;
                     done();
                 });
         });

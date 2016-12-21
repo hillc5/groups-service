@@ -1,5 +1,6 @@
 const mongoose = require('mongoose'),
-      { Member } = require('../../service/models/Model')
+      { Member } = require('../../service/models/Model'),
+      { saveTestMember, testMemberData } = require('../util/test-helpers'),
 
       chai = require('chai'),
       chaiHttp = require('chai-http'),
@@ -142,20 +143,10 @@ describe('member-api', () => {
         });
 
         it('should return 200 when member is found', done => {
-            const memberData = {
-                      name: 'Test',
-                      email: 'Test@test.com',
-                      memberGroups: [],
-                      memberPosts: [],
-                      memberEvents: [],
-                      joinDate: Date.now()
-                  },
-                  member = new Member(memberData);
-
-            member.save()
-                .then(result => {
+            saveTestMember()
+                .then(member => {
                     chai.request(service)
-                        .get(`/member/${result._id}`)
+                        .get(`/member/${member._id}`)
                         .then(res => {
                             expect(res.status).to.be.eql(200);
                             done();
@@ -165,36 +156,26 @@ describe('member-api', () => {
         });
 
         it('should return the correct data when member is found', done => {
-            const memberData = {
-                      name: 'Test',
-                      email: 'Test@test.com',
-                      memberGroups: [],
-                      memberPosts: [],
-                      memberEvents: [],
-                      joinDate: Date.now()
-                  },
-                  member = new Member(memberData);
-
             let memberId;
 
-            member.save()
-                .then(result => {
-                    memberId = result._id;
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
                     return chai.request(service).get(`/member/${memberId}`)
                 })
                 .then(res => {
                     const { _id, name, email, memberGroups, memberPosts, memberEvents, joinDate } = res.body
                     expect(res.status).to.be.eql(200);
                     expect(mongoose.mongo.ObjectId(_id)).to.be.eql(memberId);
-                    expect(name).to.be.eql(memberData.name);
-                    expect(email).to.be.eql(memberData.email);
+                    expect(name).to.be.eql(testMemberData.name);
+                    expect(email).to.be.eql(testMemberData.email);
                     expect(memberGroups).to.be.an('array');
                     expect(memberGroups.length).to.be.eql(0);
                     expect(memberPosts).to.be.an('array');
                     expect(memberPosts.length).to.be.eql(0);
                     expect(memberEvents).to.be.an('array');
                     expect(memberEvents.length).to.be.eql(0);
-                    expect(new Date(joinDate)).to.be.eql(new Date(memberData.joinDate));
+                    expect(new Date(joinDate)).to.be.eql(new Date(testMemberData.joinDate));
                     done();
                 });
 
