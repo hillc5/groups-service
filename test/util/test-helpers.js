@@ -3,7 +3,7 @@ const MODELS = require('../../service/models/Model'),
 
 const testMemberData = {
           name: 'Test',
-          email: 'Test@test.com',
+          email: getRandomEmailAddress(),
           memberGroups: [],
           memberPosts: [],
           memberEvents: [],
@@ -22,6 +22,10 @@ const testGroupData = {
           lastUpdated: Date.now(),
           owner: mongoose.mongo.ObjectId('5848772a7cc11952f4110e00')
       };
+
+function getRandomEmailAddress() {
+    return `Test${Math.floor(Math.random() * 100)}@test.com`;
+}
 
 function saveTestMember() {
     return saveTestItem('Member', testMemberData);

@@ -390,7 +390,7 @@ describe('group-api', () => {
                 });
         });
 
-        it('should return all member groups', done => {
+        it('should return all groups that a member owns', done => {
             let memberId,
                 groupData = {
                     name: 'Test Group',
@@ -421,29 +421,50 @@ describe('group-api', () => {
                 });
         });
 
-        it('should only return groups for the given ownerId', done => {
+        it('should return all groups to which a member belongs', done => {
             let memberId,
-                groupData = {
-                    name: 'Test Group',
+                groupOwnerId,
+                ownerData = {
+                    name: 'Owner',
+                    email: 'Owner@owner.com'
+                },
+                groupOneData = {
+                    name: 'group one',
                     isPublic: true
-                };
+                },
+                groupTwoData = {
+                    name: 'group two',
+                    isPublic: true
+                },
+                groupOneId, groupTwoId;
 
             saveTestMember()
                 .then(member => {
                     memberId = member._id;
                     return callService()
-                            .post(`/member/${memberId}/group`)
-                            .send(groupData);
+                            .post('/member')
+                            .send(ownerData);
+                })
+                .then(result => {
+                    ownerId = result.body._id;
+                    return callService()
+                            .post(`/member/${ownerId}/group`)
+                            .send(groupOneData);
+                })
+                .then(result => {
+                    let { _id } = result.body;
+                    return callService()
+                            .post(`/group/${_id}/member/${memberId}`);
                 })
                 .then(result => {
                     return callService()
-                            .post(`/member/${memberId}/group`)
-                            .send(groupData);
+                            .post(`/member/${ownerId}/group`)
+                            .send(groupTwoData);
                 })
                 .then(result => {
+                    let { _id } = result.body;
                     return callService()
-                            .post(`/member/${memberId}/group`)
-                            .send(groupData);
+                            .post(`/group/${_id}/member/${memberId}`);
                 })
                 .then(result => {
                     return callService()
@@ -451,61 +472,15 @@ describe('group-api', () => {
                 })
                 .then(result => {
                     const groups = result.body;
-                    expect(groups.length).to.be.eql(3);
+                    expect(groups.length).to.be.eql(2);
                     groups.forEach(group => {
-                        expect(mongoose.mongo.ObjectId(group.owner._id)).to.be.eql(memberId);
+                        expect(mongoose.mongo.ObjectId(group.owner._id)).to.not.be.eql(memberId);
                     });
                     done();
-                });
+                })
         });
 
-        it('should return the number of groups the owner has in their groups array', done => {
-            let memberId,
-                numGroups,
-                groupData = {
-                    name: 'Test Group',
-                    isPublic: true
-                };
-
-            saveTestMember()
-                .then(member => {
-                    memberId = member._id;
-                    return callService()
-                            .post(`/member/${memberId}/group`)
-                            .send(groupData);
-                })
-                .then(result => {
-                    return callService()
-                            .post(`/member/${memberId}/group`)
-                            .send(groupData);
-                })
-                .then(result => {
-                    return callService()
-                            .post(`/member/${memberId}/group`)
-                            .send(groupData);
-                })
-                .then(result => {
-                    return callService()
-                            .get(`/member/${memberId}/group`);
-                })
-                .then(result => {
-                    const groups = result.body;
-                    numGroups = groups.length;
-                    expect(numGroups).to.be.eql(3);
-                    groups.forEach(group => {
-                        expect(mongoose.mongo.ObjectId(group.owner._id)).to.be.eql(memberId);
-                    });
-                    return callService()
-                            .get(`/member/${memberId}`);
-                })
-                .then(result => {
-                    const { memberGroups } = result.body;
-                    expect(memberGroups.length).to.be.eql(numGroups);
-                    done();
-                });
-        });
-
-        it('should return an empty array if a valid member has no groups', done => {
+        it('should return an empty array if a valid member is in no groups', done => {
             saveTestMember()
                 .then(member => {
                     return callService()

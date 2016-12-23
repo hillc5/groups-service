@@ -55,7 +55,7 @@ function getAllMemberGroups(req, res) {
     validateRequest({ req, validationType, paramOptions })
         .then(() => {
             const { id } = req.params,
-                  query = { owner: mongoose.mongo.ObjectId(id) },
+                  query = { members: mongoose.mongo.ObjectId(id) },
                   fields = '-__v',
                   membersOptions = {
                       path: 'members',
