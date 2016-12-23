@@ -144,8 +144,8 @@ function findGroupById(req, res) {
 }
 
 function findGroupsByTags(req, res) {
-    const { tags } = req.query,
-          query = { tags: { $in : tags }},
+    const { tags=[] } = req.query,
+          query = { tags: { $in : Array.isArray(tags) ? tags : [ tags ] }, isPublic: true },
           // remove __v mongoose property
           fields = '-__v',
           membersOptions = {

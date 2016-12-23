@@ -628,11 +628,216 @@ describe('group-api', () => {
                 .then(response => {
                     const { owner } = response.body,
                           { name, email } = testMemberData;
+
                     expect(owner.name).to.be.eql(name);
                     expect(owner.email).to.be.eql(email);
                     expect(owner.joinDate).to.not.be.undefined;
                     done();
                 });
         });
+    });
+
+    describe('#findGroupByTags', () => {
+        it('should return an empty array if no tags are supplied', done => {
+            saveTestGroup()
+                .then(group => {
+                    return callService()
+                            .get('/group/?tags');
+                })
+                .then(response => {
+                    expect(response.status).to.be.eql(200);
+                    expect(response.body).to.be.an('array');
+                    expect(response.body.length).to.be.eql(0);
+                    done();
+                });
+        });
+
+        it('should return an empty array if no groups have the given tags', done => {
+            // testGroup tags = 'test' and 'testing'
+            saveTestGroup()
+                .then(group => {
+                    return callService()
+                            .get('/group/?tags=foo&tags=bar');
+                })
+                .then(response => {
+                    expect(response.status).to.be.eql(200);
+                    expect(response.body).to.be.an('array');
+                    expect(response.body.length).to.be.eql(0);
+                    done();
+                });
+        });
+
+        it('should return an array with a single group if only 1 group matches any of the tags', done => {
+            const groupOneData = {
+                      name: 'Test',
+                      isPublic: true,
+                      tags: 'test, testing'
+                  },
+                  groupTwoData = {
+                      name: 'Test Again',
+                      isPublic: true,
+                      tags: 'notest, testing'
+                  };
+
+            let memberId;
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+                    return callService()
+                            .post(`/member/${memberId}/group`)
+                            .send(groupOneData);
+                })
+                .then(() => {
+                    return callService()
+                            .post(`/member/${memberId}/group`)
+                            .send(groupTwoData);
+                })
+                .then(() => {
+                    return callService()
+                            .get('/group/?tags=test&tags=bar');
+                })
+                .then(response => {
+                    expect(response.status).to.be.eql(200);
+                    expect(response.body).to.be.an('array');
+                    expect(response.body.length).to.be.eql(1);
+                    done();
+                });
+        });
+
+        it('should return an array with all groups matching a tag', done => {
+            const groupOneData = {
+                      name: 'Test',
+                      isPublic: true,
+                      tags: 'test, testing'
+                  },
+                  groupTwoData = {
+                      name: 'Test Again',
+                      isPublic: true,
+                      tags: 'notest, testing'
+                  };
+
+            let memberId;
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+                    return callService()
+                            .post(`/member/${memberId}/group`)
+                            .send(groupOneData);
+                })
+                .then(() => {
+                    return callService()
+                            .post(`/member/${memberId}/group`)
+                            .send(groupTwoData);
+                })
+                .then(() => {
+                    return callService()
+                            .get('/group/?tags=testing&tags=bar');
+                })
+                .then(response => {
+                    expect(response.status).to.be.eql(200);
+                    expect(response.body).to.be.an('array');
+                    expect(response.body.length).to.be.eql(2);
+                    done();
+                });
+        });
+
+        it('should return an array with all groups matching any of the tags listed', done => {
+            const groupOneData = {
+                      name: 'Test',
+                      isPublic: true,
+                      tags: 'test, testing'
+                  },
+                  groupTwoData = {
+                      name: 'Test Again',
+                      isPublic: true,
+                      tags: 'notest, testing'
+                  },
+                  groupThreeData = {
+                      name: 'Test Thrice',
+                      isPublic: true,
+                      tags: 'test, notesting'
+                  };
+
+            let memberId;
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+                    return callService()
+                            .post(`/member/${memberId}/group`)
+                            .send(groupOneData);
+                })
+                .then(() => {
+                    return callService()
+                            .post(`/member/${memberId}/group`)
+                            .send(groupTwoData);
+                })
+                .then(() => {
+                    return callService()
+                            .post(`/member/${memberId}/group`)
+                            .send(groupThreeData);
+                })
+                .then(() => {
+                    return callService()
+                            .get('/group/?tags=testing&tags=test');
+                })
+                .then(response => {
+                    expect(response.status).to.be.eql(200);
+                    expect(response.body).to.be.an('array');
+                    expect(response.body.length).to.be.eql(3);
+                    done();
+                });
+        });
+
+        it('should only return public groups matching any of the tags listed', done => {
+            const groupOneData = {
+                      name: 'Test',
+                      isPublic: true,
+                      tags: 'test, testing'
+                  },
+                  groupTwoData = {
+                      name: 'Test Again',
+                      isPublic: true,
+                      tags: 'notest, testing'
+                  },
+                  groupThreeData = {
+                      name: 'Test Thrice',
+                      isPublic: false,
+                      tags: 'test, notesting'
+                  };
+
+            let memberId;
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+                    return callService()
+                            .post(`/member/${memberId}/group`)
+                            .send(groupOneData);
+                })
+                .then(() => {
+                    return callService()
+                            .post(`/member/${memberId}/group`)
+                            .send(groupTwoData);
+                })
+                .then(() => {
+                    return callService()
+                            .post(`/member/${memberId}/group`)
+                            .send(groupThreeData);
+                })
+                .then(() => {
+                    return callService()
+                            .get('/group/?tags=testing&tags=test');
+                })
+                .then(response => {
+                    expect(response.status).to.be.eql(200);
+                    expect(response.body).to.be.an('array');
+                    expect(response.body.length).to.be.eql(2);
+                    done();
+                });
+        });
+
     });
 });

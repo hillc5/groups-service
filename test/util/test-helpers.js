@@ -38,15 +38,15 @@ function saveTestItem(modelType, testData) {
         .then(result => {
             return new Promise(resolve => {
                 // Hack for tests.  Give mongo enough time to
-                // store the saveed item.
+                // store the saved item.
                 setTimeout(() => resolve(result), 0);
             });
         });
 }
 
 module.exports = {
-  saveTestMember,
-  saveTestGroup,
-  testMemberData,
-  testGroupData
+    saveTestMember,
+    saveTestGroup,
+    testMemberData,
+    testGroupData
 };

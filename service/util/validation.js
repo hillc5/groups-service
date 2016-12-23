@@ -20,17 +20,19 @@ function createValidationSchema(schemaType, fields) {
  * @param  {Array}  options.bodyOptions      body params that need to be validated
  * @return {Promise}                         Promise resolved with response, or rejected with error
  */
-function validateRequest({ req, validationType, paramOptions=[], bodyOptions=[] }={}) {
+function validateRequest({ req, validationType, paramOptions=[], bodyOptions=[], queryOptions=[] }={}) {
     const paramValidationSchema = createValidationSchema(validationType, paramOptions),
-          bodyValidationSchema = createValidationSchema(validationType, bodyOptions);
+          bodyValidationSchema = createValidationSchema(validationType, bodyOptions),
+          queryValidationSchema = createValidationSchema(validationType, queryOptions);
 
     // trim ALL the things!
-    [ ...paramOptions, ...bodyOptions ].forEach(option => {
+    [ ...paramOptions, ...bodyOptions, ...queryOptions ].forEach(option => {
         req.sanitize(option).trim();
     });
 
     req.checkParams(paramValidationSchema);
     req.checkBody(bodyValidationSchema);
+    req.checkQuery(queryValidationSchema)
 
     // result.throw() only throws an error if there is an actual error present on the result
     return req.getValidationResult().then(result => result.throw());
@@ -80,6 +82,7 @@ const validationMap = {
         }
     }
 }
+
 
 module.exports = {
     validateRequest,
