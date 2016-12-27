@@ -100,6 +100,7 @@ describe('member-api', () => {
                     expect(memberEvents).to.be.an('array');
                     expect(memberPosts).to.be.an('array');
                     expect(joinDate).to.be.a('string');
+                    expect(new Date(joinDate)).to.be.an.instanceOf(Date);
                     // make sure test fails if Member schema is updated
                     expect(Object.keys(res.body).length).to.be.eql(8);
                     done();

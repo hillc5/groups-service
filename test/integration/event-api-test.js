@@ -161,5 +161,105 @@ describe('event-api', () => {
                 });
         });
 
+        it('should return the full event on success', done => {
+            const newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            let memberId, groupId;
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+                    return saveTestGroup();
+                })
+                .then(group => {
+                    groupId = group._id;
+                    return callService()
+                            .post(`/group/${groupId}/member/${memberId}/event`)
+                            .send(newEvent);
+                })
+                .then(result => {
+                    const { body: event } = result;
+                    expect(event.name).to.be.a('string');
+                    expect(event.name).to.be.eql(newEvent.name);
+                    expect(event.startDate).to.be.a('string');
+                    expect(new Date(event.startDate)).to.be.an.instanceOf(Date);
+                    expect(event.endDate).to.be.a('string');
+                    expect(new Date(event.endDate)).to.be.an.instanceOf(Date);
+                    expect(mongoose.mongo.ObjectId(event.creator)).to.be.an.instanceOf(mongoose.mongo.ObjectId);
+                    expect(mongoose.mongo.ObjectId(event.group)).to.be.an.instanceOf(mongoose.mongo.ObjectId);
+                    expect(event.posts).to.be.an('array');
+                    expect(event.posts.length).to.be.eql(0);
+                    expect(event.invitees).to.be.an('array');
+                    expect(event.invitees.length).to.be.eql(0);
+                    expect(event.attendees).to.be.an('array');
+                    expect(event.attendees.length).to.be.eql(0);
+                    done();
+                });
+        });
+
+        it('should store eventId in the creating members memberEvents array', done => {
+            const newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            let memberId, groupId, eventId;
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+                    return saveTestGroup();
+                })
+                .then(group => {
+                    groupId = group._id;
+                    return callService()
+                            .post(`/group/${groupId}/member/${memberId}/event`)
+                            .send(newEvent);
+                })
+                .then(result => {
+                    eventId = result.body._id;
+                    return Member.findOne({ _id: memberId });
+                })
+                .then(member => {
+                    expect(member.memberEvents).to.include(eventId);
+                    done();
+                });
+        });
+
+        it('should store eventId in the owning groups events array', done => {
+            const newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            let memberId, groupId, eventId;
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+                    return saveTestGroup();
+                })
+                .then(group => {
+                    groupId = group._id;
+                    return callService()
+                            .post(`/group/${groupId}/member/${memberId}/event`)
+                            .send(newEvent);
+                })
+                .then(result => {
+                    eventId = result.body._id;
+                    return Group.findOne({ _id: groupId });
+                })
+                .then(group => {
+                    expect(group.events).to.include(eventId);
+                    done();
+                });
+        });
+
     });
 });
