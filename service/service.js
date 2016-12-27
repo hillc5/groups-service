@@ -9,6 +9,7 @@ const express = require('express'),
       connect = require('./db'),
 
       groupAPI = require('./api-services/group-api'),
+      eventAPI = require('./api-services/event-api'),
       memberAPI = require('./api-services/member-api');
 
 
@@ -37,6 +38,8 @@ function startService() {
     app.get('/group/:id', groupAPI.findGroupById);
     app.post('/group/:id/member/:memberId', groupAPI.addMemberToGroup);
     app.get('/group/', groupAPI.findGroupsByTags);
+
+    app.post('/group/:groupId/member/:memberId/event', eventAPI.createEvent);
 
     app.listen(9000);
     logger.info('Now listening on port 9000');

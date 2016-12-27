@@ -50,21 +50,26 @@ function sendError(res) {
 }
 
 const sharedMappings = {
-    'id': {
+    'id': (value) => ({
         isMongoId: {
-            errorMessage: 'id must be a valid MongoDB ObjecttId'
+            errorMessage: `${value} must be a valid MongoDB ObjectId`
         }
-    },
+    }),
     'name': {
         notEmpty: true,
         errorMessage: 'Member name is required'
+    },
+    'date': {
+        isDate: {
+            errorMessage: 'startDate must be a valid Date string'
+        }
     }
-}
+};
 
 const validationMap = {
     group: {
-        'id': sharedMappings.id,
-        'memberId': sharedMappings.id,
+        'id': sharedMappings.id('id'),
+        'memberId': sharedMappings.id('memberId'),
         'name': sharedMappings.name,
         'isPublic': {
             isBoolean: {
@@ -73,15 +78,22 @@ const validationMap = {
         }
     },
     member: {
-        'id': sharedMappings.id,
+        'id': sharedMappings.id('id'),
         'name': sharedMappings.name,
         'email': {
             isEmail: {
                 errorMessage: 'A valid email address is required'
             }
         }
+    },
+    event: {
+        'groupId': sharedMappings.id('groupId'),
+        'memberId': sharedMappings.id('memberId'),
+        'name': sharedMappings.name,
+        'startDate': sharedMappings.date,
+        'endDate': sharedMappings.date
     }
-}
+};
 
 
 module.exports = {

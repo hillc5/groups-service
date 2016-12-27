@@ -28,8 +28,8 @@ const EventSchema = Schema({
     invitees: [ { type: ObjectId, ref: 'Member' } ],
     attendees: [ { type: ObjectId, ref: 'Member' } ],
     posts: [ { type: ObjectId, ref: 'Post' } ],
-    startDate: Date,
-    endDate: Date,
+    startDate: { type: Date, required: true },
+    endDate: { type: Date, required: true }
 });
 
 const GroupSchema = Schema({
