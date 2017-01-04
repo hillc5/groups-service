@@ -40,6 +40,8 @@ function startService() {
     app.get('/group/', groupAPI.findGroupsByTags);
 
     app.post('/group/:groupId/member/:memberId/event', eventAPI.createEvent);
+    app.get('/event/:id', eventAPI.getEventById);
+    app.get('/member/:memberId/event', eventAPI.getAllMemberEvents);
 
     app.listen(9000);
     logger.info('Now listening on port 9000');

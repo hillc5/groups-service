@@ -51,7 +51,7 @@ function findMemberById(req, res) {
                           {
                               path: 'posts',
                               select: 'title text postDate',
-                              options: { sort: { postDate: -1}, limit: 10 }
+                              options: { sort: { postDate: -1 }, limit: 10 }
                           },
                           {
                               path: 'events',

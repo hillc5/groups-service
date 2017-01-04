@@ -87,6 +87,7 @@ const validationMap = {
         }
     },
     event: {
+        'id': sharedMappings.id('id'),
         'groupId': sharedMappings.id('groupId'),
         'memberId': sharedMappings.id('memberId'),
         'name': sharedMappings.name,

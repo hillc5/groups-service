@@ -29,6 +29,26 @@ function saveEvent(eventData) {
             });
 }
 
+function findEvents(query, fields, refOptions) {
+    let eventQuery = Event.find(query)
+                            .select(fields)
+                            .populate(refOptions);
+
+    logger.info(`${DATA_NAME} - find events by ${JSON.stringify(query)}`);
+    return eventQuery.exec();
+}
+
+function findEvent(query, fields, refOptions) {
+    let eventQuery = Event.findOne(query)
+                            .select(fields)
+                            .populate(refOptions);
+
+    logger.info(`${DATA_NAME} - find event by ${JSON.stringify(query)}`);
+    return eventQuery.exec();
+}
+
 module.exports = {
-    saveEvent
+    saveEvent,
+    findEvents,
+    findEvent
 };
