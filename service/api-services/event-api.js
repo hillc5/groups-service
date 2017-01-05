@@ -17,7 +17,7 @@ function createEvent(req, res) {
                       creator: memberId,
                       startDate: new Date(startDate),
                       endDate: new Date(endDate),
-                      invitees: invitees && invitees.map(invitee => invitee.trim()) || []
+                      invitees: invitees.map(invitee => invitee.trim())
                   };
 
             return eventData.saveEvent(newEvent);
@@ -29,10 +29,10 @@ function createEvent(req, res) {
 }
 
 function getEventById(req, res) {
-    const bodyOptions = [ 'id' ],
+    const paramOptions = [ 'id' ],
           validationType = 'event';
 
-    validateRequest({ req, bodyOptions, validationType })
+    validateRequest({ req, paramOptions, validationType })
         .then(() => {
             const { id } = req.params,
                   query = { _id: id },
@@ -64,7 +64,7 @@ function getEventById(req, res) {
                   },
                   refOptions = [ groupOptions, creatorOptions, inviteesOptions, attendeesOptions, postOptions ];
 
-            return eventDatea.findEvent(query, fields, refOptions);
+            return eventData.findEvent(query, fields, refOptions);
         })
         .then(result => {
             if (result) {

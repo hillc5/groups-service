@@ -676,6 +676,190 @@ describe('event-api', () => {
                     expect(error.id.param).to.be.eql('id');
                     done();
                 });
-        })
+        });
+
+        it('should return 200 if an event is found successfully', done => {
+            const newGroup = {
+                      name: 'Test Group',
+                      isPublic: true
+                  },
+                  newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            let memberId, groupId;
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+
+                    return callService()
+                            .post(`/member/${memberId}/group`)
+                            .send(newGroup);
+                })
+                .then(result => {
+                    groupId = result.body._id;
+
+                    return callService()
+                            .post(`/group/${groupId}/member/${memberId}/event`)
+                            .send(newEvent);
+                })
+                .then(result => {
+                    const eventId = result.body._id;
+                    return callService()
+                            .get(`/event/${eventId}`);
+                })
+                .then(result => {
+                    expect(result.status).to.be.eql(200);
+                    done();
+                });
+        });
+
+        it('should return name, and id for the events group', done => {
+            const newGroup = {
+                      name: 'Test Group',
+                      isPublic: true
+                  },
+                  newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            let memberId, groupId;
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+
+                    return callService()
+                            .post(`/member/${memberId}/group`)
+                            .send(newGroup);
+                })
+                .then(result => {
+                    groupId = result.body._id;
+
+                    return callService()
+                            .post(`/group/${groupId}/member/${memberId}/event`)
+                            .send(newEvent);
+                })
+                .then(result => {
+                    const eventId = result.body._id;
+                    return callService()
+                            .get(`/event/${eventId}`);
+                })
+                .then(result => {
+                    const { body: event } = result;
+                    expect(event.group).to.not.be.undefined;
+                    expect(event.group.name).to.be.eql(newGroup.name);
+                    expect(event._id).to.not.be.undefined;
+                    done();
+                });
+        });
+
+        it('should return name, email, and joinDate for the events creator', done => {
+            const newGroup = {
+                      name: 'Test Group',
+                      isPublic: true
+                  },
+                  newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            let savedMember, groupId;
+
+            saveTestMember()
+                .then(member => {
+                    savedMember = member;
+
+                    return callService()
+                            .post(`/member/${savedMember._id}/group`)
+                            .send(newGroup);
+                })
+                .then(result => {
+                    groupId = result.body._id;
+
+                    return callService()
+                            .post(`/group/${groupId}/member/${savedMember._id}/event`)
+                            .send(newEvent);
+                })
+                .then(result => {
+                    const eventId = result.body._id;
+                    return callService()
+                            .get(`/event/${eventId}`);
+                })
+                .then(result => {
+                    const { body: event } = result;
+                    expect(event.creator).to.not.be.undefined;
+                    expect(event.creator.name).to.be.eql(savedMember.name);
+                    expect(event.creator.email).to.be.eql(savedMember.email);
+                    expect(event._id).to.not.be.undefined;
+                    expect(new Date(event.creator.joinDate)).to.be.eql(new Date(savedMember.joinDate));
+                    done();
+                });
+        });
+
+        it('should return name, email, and joinDate for the events invitees', done => {
+            const newGroup = {
+                      name: 'Test Group',
+                      isPublic: true
+                  },
+                  newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  },
+                  newMember = {
+                      name: 'Test',
+                      email: 'Bill@Bob.com'
+                  };
+
+            let savedMember, invitee, groupId;
+
+            saveTestMember()
+                .then(member => {
+                    savedMember = member;
+
+                    return callService()
+                            .post(`/member/${savedMember._id}/group`)
+                            .send(newGroup);
+                })
+                .then(result => {
+                    groupId = result.body._id;
+                    return callService()
+                            .post('/member')
+                            .send(newMember);
+                })
+                .then(result => {
+                    const invitee = result.body;
+                    newEvent.invitees = [];
+                    newEvent.invitees.push(invitee._id);
+                    return callService()
+                            .post(`/group/${groupId}/member/${savedMember._id}/event`)
+                            .send(newEvent);
+                })
+                .then(result => {
+                    const eventId = result.body._id;
+                    return callService()
+                            .get(`/event/${eventId}`);
+                })
+                .then(result => {
+                    const { body: event } = result;
+
+                    expect(event.invitees).to.not.be.undefined;
+
+                    const [ invitee ] = event.invitees;
+
+                    expect(invitee.name).to.be.eql(newMember.name);
+                    expect(invitee.email).to.be.eql(newMember.email);
+                    expect(invitee._id).to.not.be.undefined;
+                    expect(invitee.joinDate).to.not.be.undefined;
+                    done();
+                });
+        });
     });
 });
