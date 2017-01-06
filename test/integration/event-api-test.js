@@ -862,4 +862,182 @@ describe('event-api', () => {
                 });
         });
     });
+
+    describe('#getAllGroupEvents', () => {
+        it('should return 400 if groupId is invalid', done => {
+            callService()
+                .get('/group/wrongId/event')
+                .then(() => {
+                    // Fail test if we hit this block
+                    expect(false).to.be.true;
+                })
+                .catch(err => {
+                    const error = JSON.parse(err.response.text);
+                    expect(err.status).to.be.eql(400);
+                    expect(error.groupId.param).to.not.be.undefined;
+                    expect(error.groupId.param).to.be.eql('groupId');
+                    done();
+                });
+        });
+
+        it('should return 200 on success', done => {
+            const newGroup = {
+                      name: 'Test Group',
+                      isPublic: true
+                  },
+                  newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            let memberId, groupId;
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+                    return callService()
+                            .post(`/member/${memberId}/group`)
+                            .send(newGroup);
+                })
+                .then(result => {
+                    groupId = result.body._id;
+                    return callService()
+                            .post(`/group/${groupId}/member/${memberId}/event`)
+                            .send(newEvent);
+                })
+                .then(() => {
+                    return callService()
+                            .get(`/group/${groupId}/event`);
+                })
+                .then(result => {
+                    expect(result.status).to.be.eql(200);
+                    done();
+                });
+
+        });
+
+        it('should return an empty array if no events are found for the given group', done => {
+            const newGroup = {
+                      name: 'Test Group',
+                      isPublic: true
+                  },
+                  newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            let memberId, groupId;
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+                    return callService()
+                            .post(`/member/${memberId}/group`)
+                            .send(newGroup);
+                })
+                .then(result => {
+                    groupId = result.body._id;
+                    return callService()
+                            .get(`/group/${groupId}/event`);
+                })
+                .then(result => {
+                    expect(result.status).to.be.eql(200);
+                    expect(result.body).to.be.eql([]);
+                    done();
+                });
+        });
+
+        it('should return a single event if only one has been saved for a group', done => {
+            const newGroup = {
+                      name: 'Test Group',
+                      isPublic: true
+                  },
+                  newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            let memberId, groupId;
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+                    return callService()
+                            .post(`/member/${memberId}/group`)
+                            .send(newGroup);
+                })
+                .then(result => {
+                    groupId = result.body._id;
+                    return callService()
+                            .post(`/group/${groupId}/member/${memberId}/event`)
+                            .send(newEvent);
+                })
+                .then(() => {
+                    return callService()
+                            .get(`/group/${groupId}/event`);
+                })
+                .then(result => {
+                    const { body: events } = result;
+                    expect(result.status).to.be.eql(200);
+                    expect(events.length).to.be.eql(1);
+                    done();
+                });
+        });
+
+        it('should return multiple events if they have been saved for a group', done => {
+            const newGroup = {
+                      name: 'Test Group',
+                      isPublic: true
+                  },
+                  newEventOne = {
+                      name: 'Test Event One',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  },
+                  newEventTwo = {
+                      name: 'Test Event Two',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            let memberId, groupId;
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+                    return callService()
+                            .post(`/member/${memberId}/group`)
+                            .send(newGroup);
+                })
+                .then(result => {
+                    groupId = result.body._id;
+                    return callService()
+                            .post(`/group/${groupId}/member/${memberId}/event`)
+                            .send(newEventOne);
+                })
+                .then(() => {
+                    return callService()
+                            .post(`/group/${groupId}/member/${memberId}/event`)
+                            .send(newEventTwo);
+                })
+                .then(() => {
+                    return callService()
+                            .get(`/group/${groupId}/event`);
+                })
+                .then(result => {
+                    const { body: events } = result;
+                    expect(result.status).to.be.eql(200);
+                    expect(events.length).to.be.eql(2);
+
+                    const [ savedEventOne, savedEventTwo ] = events;
+                    expect(savedEventOne.name).to.be.eql(newEventOne.name);
+                    expect(savedEventTwo.name).to.be.eql(newEventTwo.name);
+                    done();
+                });
+
+        });
+    });
 });

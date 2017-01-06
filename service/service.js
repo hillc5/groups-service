@@ -30,18 +30,31 @@ function startService() {
     // Adds validation methods to req object
     app.use(expressValidator());
 
+    // TODO
+    // Rewrite APIs to emphasize body parameters
+    // rather than request parameters
+    // e.g. POST - group/:groupId/member/:memberId/event
+    // becomes POST - /event with groupId and memberId in
+    // body parameters.
+    //
+    // Should result in a much cleaner API
+
+    // Member API
     app.post('/member', memberAPI.createMember);
     app.get('/member/:id', memberAPI.findMemberById);
 
+    // Group API
     app.post('/member/:id/group', groupAPI.createGroup);
     app.get('/member/:id/group', groupAPI.getAllMemberGroups);
     app.get('/group/:id', groupAPI.findGroupById);
     app.post('/group/:id/member/:memberId', groupAPI.addMemberToGroup);
     app.get('/group/', groupAPI.findGroupsByTags);
 
+    // Event API
     app.post('/group/:groupId/member/:memberId/event', eventAPI.createEvent);
     app.get('/event/:id', eventAPI.getEventById);
     app.get('/member/:memberId/event', eventAPI.getAllMemberEvents);
+    app.get('/group/:groupId/event', eventAPI.getAllGroupEvents);
 
     app.listen(9000);
     logger.info('Now listening on port 9000');

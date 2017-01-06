@@ -23,6 +23,9 @@ const testGroupData = {
           owner: mongoose.mongo.ObjectId('5848772a7cc11952f4110e00')
       };
 
+// TODO - Rewrite saveTest methods to use the actual service
+// probably will be passed in from the test modules.
+
 function getRandomEmailAddress() {
     return `Test${Math.floor(Math.random() * 100)}@test.com`;
 }

@@ -39,7 +39,7 @@ function validateRequest({ req, validationType, paramOptions=[], bodyOptions=[],
 }
 
 function sendError(res) {
-    return (err) => {
+    return err => {
         if (err && err.mapped) {
             res.status(400).send(err.mapped());
         } else {
