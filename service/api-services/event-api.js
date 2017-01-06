@@ -76,7 +76,7 @@ function getEventById(req, res) {
         .catch(sendError(res));
 }
 
-function getAllMemberEvents(req, res) {
+function getAllMemberCreatedEvents(req, res) {
     const paramOptions = [ 'memberId' ],
           validationType = 'event';
 
@@ -169,7 +169,7 @@ function getAllGroupEvents(req, res) {
 
 module.exports = {
     createEvent,
-    getAllMemberEvents,
+    getAllMemberCreatedEvents,
     getAllGroupEvents,
     getEventById
 };

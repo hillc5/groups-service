@@ -310,7 +310,7 @@ describe('event-api', () => {
     });
 
 
-    describe('#getAllMemberEvents', () => {
+    describe('#getAllMemberCreatedEvents', () => {
         it('should return 400 if an invalid memberId is given', done => {
 
            callService()
@@ -1037,7 +1037,81 @@ describe('event-api', () => {
                     expect(savedEventTwo.name).to.be.eql(newEventTwo.name);
                     done();
                 });
+        });
 
+        it('should return all events for a group across multiple members', done => {
+            const newMemberOne = {
+                      name: 'Test Member One',
+                      email: 'TestOne@Test.com'
+                  },
+                  newMemberTwo = {
+                      name: 'Test Member Two',
+                      email: 'TestTwo@Test.com'
+                  },
+                  newGroup = {
+                      name: 'Test Group',
+                      isPublic: true
+                  },
+                  newEventOne = {
+                      name: 'Test Event One',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  },
+                  newEventTwo = {
+                      name: 'Test Event Two',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            let memberOneId, memberTwoId, groupId;
+
+            callService()
+                .post('/member')
+                .send(newMemberOne)
+                .then(result => {
+                    memberOne = result.body;
+
+                    return callService()
+                            .post(`/member/${memberOne._id}/group`)
+                            .send(newGroup);
+                })
+                .then(result => {
+                    groupId = result.body._id;
+
+                    return callService()
+                            .post(`/group/${groupId}/member/${memberOne._id}/event`)
+                            .send(newEventOne);
+                })
+                .then(() => {
+                    return callService()
+                            .post('/member')
+                            .send(newMemberTwo);
+                })
+                .then(result => {
+                    memberTwo = result.body;
+
+                    return callService()
+                            .post(`/group/${groupId}/member/${memberTwo._id}`);
+                })
+                .then(() => {
+                    return callService()
+                            .post(`/group/${groupId}/member/${memberTwo._id}/event`)
+                            .send(newEventTwo);
+                })
+                .then(() => {
+                    return callService()
+                            .get(`/group/${groupId}/event`);
+                })
+                .then(result => {
+                    const { body: events } = result;
+                    expect(events.length).to.be.eql(2);
+                    const [ savedEventOne, savedEventTwo ] = events;
+                    expect(savedEventOne.name).to.be.eql(newEventOne.name);
+                    expect(savedEventOne.creator.name).to.be.eql(memberOne.name);
+                    expect(savedEventTwo.name).to.be.eql(newEventTwo.name);
+                    expect(savedEventTwo.creator.name).to.be.eql(memberTwo.name);
+                    done();
+                })
         });
     });
 });
