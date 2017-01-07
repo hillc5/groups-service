@@ -52,7 +52,7 @@ function startService() {
 
     // Event API
     app.post('/event', eventAPI.createEvent);
-    app.get('/event/:id', eventAPI.getEventById);
+    app.get('/event/:eventId', eventAPI.getEventById);
     app.get('/event/member/:memberId', eventAPI.getAllMemberCreatedEvents);
     app.get('/event/group/:groupId', eventAPI.getAllGroupEvents);
 

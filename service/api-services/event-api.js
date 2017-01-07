@@ -27,13 +27,13 @@ function createEvent(req, res) {
 }
 
 function getEventById(req, res) {
-    const paramOptions = [ 'id' ],
+    const paramOptions = [ 'eventId' ],
           validationType = 'event';
 
     validateRequest({ req, paramOptions, validationType })
         .then(() => {
-            const { id } = req.params,
-                  query = { _id: id },
+            const { eventId } = req.params,
+                  query = { _id: eventId },
                   // remove __v mongoose property
                   fields = '-__v',
                   groupOptions = {
