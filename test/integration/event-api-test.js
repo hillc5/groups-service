@@ -333,7 +333,7 @@ describe('event-api', () => {
         it('should return 400 if an invalid memberId is given', done => {
 
            callService()
-                .get('/member/wrongId/event')
+                .get('/event/member/wrongId')
                 .then(() => {
                     // Fail test if we hit this block
                     expect(false).to.be.true;
@@ -352,7 +352,7 @@ describe('event-api', () => {
                 .then(member => {
                     let memberId = member._id;
                     return callService()
-                            .get(`/member/${memberId}/event`);
+                            .get(`/event/member/${memberId}`);
                 })
                 .then(result => {
                     expect(result.status).to.be.eql(200);
@@ -365,7 +365,7 @@ describe('event-api', () => {
                 .then(member => {
                     let memberId = member._id;
                     return callService()
-                            .get(`/member/${memberId}/event`);
+                            .get(`/event/member/${memberId}`);
                 })
                 .then(result => {
                     const { body: events } = result
@@ -407,7 +407,7 @@ describe('event-api', () => {
                 })
                 .then(() => {
                     return callService()
-                            .get(`/member/${memberId}/event`);
+                            .get(`/event/member/${memberId}`);
                 })
                 .then(result => {
                     const events = result.body,
@@ -463,7 +463,7 @@ describe('event-api', () => {
                 })
                 .then(() => {
                     return callService()
-                            .get(`/member/${memberId}/event`);
+                            .get(`/event/member/${memberId}`);
                 })
                 .then(result => {
                     const events = result.body,
@@ -535,7 +535,7 @@ describe('event-api', () => {
                 })
                 .then(() => {
                     return callService()
-                            .get(`/member/${memberId}/event`);
+                            .get(`/event/member/${memberId}`);
                 })
                 .then(result => {
                     const { body: events } = result,
@@ -585,7 +585,7 @@ describe('event-api', () => {
                 })
                 .then(() => {
                     return callService()
-                            .get(`/member/${memberId}/event`);
+                            .get(`/event/member/${memberId}`);
                 })
                 .then(result => {
                     const events = result.body,
@@ -635,7 +635,7 @@ describe('event-api', () => {
                 })
                 .then(() => {
                     return callService()
-                            .get(`/member/${memberId}/event`);
+                            .get(`/event/member/${memberId}`);
                 })
                 .then(result => {
                     const events = result.body,
@@ -681,7 +681,7 @@ describe('event-api', () => {
                 })
                 .then(() => {
                     return callService()
-                            .get(`/member/${memberId}/event`);
+                            .get(`/event/member/${memberId}`);
                 })
                 .then(result => {
                     const events = result.body,
