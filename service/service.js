@@ -30,15 +30,6 @@ function startService() {
     // Adds validation methods to req object
     app.use(expressValidator());
 
-    // TODO
-    // Rewrite APIs to emphasize body parameters
-    // rather than request parameters
-    // e.g. POST - group/:groupId/member/:memberId/event
-    // becomes POST - /event with groupId and memberId in
-    // body parameters.
-    //
-    // Should result in a much cleaner API
-
     // Member API
     app.post('/member', memberAPI.createMember);
     app.get('/member/:memberId', memberAPI.findMemberById);
