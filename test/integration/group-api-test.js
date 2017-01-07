@@ -251,7 +251,7 @@ describe('group-api', () => {
     describe('#addMemberToGroup', () => {
         it('should return 400 for incorrect groupId', done => {
             callService()
-                .post(`/group/wrongId/member/5848ed108b3ccb3ffcc691d`)
+                .post(`/group/wrongId/member`)
                 .then(result => {
                     // Fail if we hit this spot
                     expect(false).to.be.true;
@@ -265,7 +265,8 @@ describe('group-api', () => {
 
         it('should return 400 for incorrect memberId', done => {
             callService()
-                .post(`/group/5848ed108b3ccb3ffcc691d/member/wrongId`)
+                .post(`/group/5848ed108b3ccb3ffcc691d/member`)
+                .send({ memberId: 'wrongId' })
                 .then(result => {
                     // Fail if we hit this spot
                     expect(false).to.be.true;
@@ -287,7 +288,8 @@ describe('group-api', () => {
                 })
                 .then(group => {
                     return callService()
-                            .post(`/group/${group._id}/member/${memberId}`);
+                            .post(`/group/${group._id}/member`)
+                            .send({ memberId });
                 })
                 .then(result => {
                     expect(result.status).to.be.eql(200);
@@ -305,7 +307,8 @@ describe('group-api', () => {
                 })
                 .then(group => {
                     return callService()
-                            .post(`/group/${group._id}/member/${memberId}`);
+                            .post(`/group/${group._id}/member`)
+                            .send({ memberId });
                 })
                 .then(result => {
                     const { members } = result.body;
@@ -327,7 +330,8 @@ describe('group-api', () => {
                 .then(group => {
                     groupId = group._id;
                     return callService()
-                        .post(`/group/${groupId}/member/${memberId}`);
+                        .post(`/group/${groupId}/member`)
+                        .send({ memberId });
                 })
                 .then(() => {
                     return Member.findOne({ _id: memberId }).exec();
@@ -429,7 +433,8 @@ describe('group-api', () => {
                 .then(result => {
                     let { _id: groupId } = result.body;
                     return callService()
-                            .post(`/group/${groupId}/member/${memberId}`);
+                            .post(`/group/${groupId}/member`)
+                            .send({ memberId });
                 })
                 .then(result => {
                     return callService()
@@ -439,7 +444,8 @@ describe('group-api', () => {
                 .then(result => {
                     let { _id: groupId } = result.body;
                     return callService()
-                            .post(`/group/${groupId}/member/${memberId}`);
+                            .post(`/group/${groupId}/member`)
+                            .send({ memberId });
                 })
                 .then(result => {
                     return callService()

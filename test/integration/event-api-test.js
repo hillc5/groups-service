@@ -1100,9 +1100,12 @@ describe('event-api', () => {
                 })
                 .then(result => {
                     memberTwo = result.body;
-
+                    let member = {
+                        memberId: memberTwo._id
+                    };
                     return callService()
-                            .post(`/group/${groupId}/member/${memberTwo._id}`);
+                            .post(`/group/${groupId}/member`)
+                            .send(member);
                 })
                 .then(() => {
                     return callService()

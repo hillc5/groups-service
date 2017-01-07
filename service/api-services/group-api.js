@@ -28,13 +28,16 @@ function createGroup(req, res) {
 }
 
 function addMemberToGroup(req, res) {
-    const paramOptions = [ 'id', 'memberId' ],
+    const paramOptions = [ 'groupId' ],
+          bodyOptions = [ 'memberId' ],
           validationType = 'group';
 
-    validateRequest({ req, validationType, paramOptions })
+    validateRequest({ req, validationType, paramOptions, bodyOptions })
         .then(() => {
-            const { id, memberId } = req.params;
-            return groupData.addMemberToGroup(id, memberId);
+            const { groupId } = req.params,
+                  { memberId } = req.body;
+
+            return groupData.addMemberToGroup(groupId, memberId);
         })
         .then(result => {
             if (result) {

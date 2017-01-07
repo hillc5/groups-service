@@ -1,14 +1,3 @@
-function createValidationSchema(schemaType, fields) {
-    let schema = {},
-        type = schemaType.toLowerCase();
-
-    fields.forEach(field => {
-        schema[field] = validationMap[type][field];
-    });
-
-    return schema;
-}
-
 /**
  * Checks the request body and request parameters for any invalid attributes.
  * Trims all inputs so that leading/trailing whitespace does not get added to
@@ -36,6 +25,17 @@ function validateRequest({ req, validationType, paramOptions=[], bodyOptions=[],
 
     // result.throw() only throws an error if there is an actual error present on the result
     return req.getValidationResult().then(result => result.throw());
+}
+
+function createValidationSchema(schemaType, fields) {
+    let schema = {},
+        type = schemaType.toLowerCase();
+
+    fields.forEach(field => {
+        schema[field] = validationMap[type][field];
+    });
+
+    return schema;
 }
 
 function sendError(res) {
@@ -70,6 +70,7 @@ const validationMap = {
     group: {
         'id': sharedMappings.id('id'),
         'owner': sharedMappings.id('owner'),
+        'groupId': sharedMappings.id('groupId'),
         'memberId': sharedMappings.id('memberId'),
         'name': sharedMappings.name,
         'isPublic': {
