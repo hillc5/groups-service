@@ -47,13 +47,13 @@ function addMemberToGroup(req, res) {
 }
 
 function getAllMemberGroups(req, res) {
-    const paramOptions = [ 'id' ],
+    const paramOptions = [ 'memberId' ],
           validationType = 'group';
 
     validateRequest({ req, validationType, paramOptions })
         .then(() => {
-            const { id } = req.params,
-                  query = { members: mongoose.mongo.ObjectId(id) },
+            const { memberId } = req.params,
+                  query = { members: mongoose.mongo.ObjectId(memberId) },
                   fields = '-__v',
                   membersOptions = {
                       path: 'members',

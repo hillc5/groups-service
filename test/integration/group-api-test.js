@@ -342,7 +342,7 @@ describe('group-api', () => {
     describe('#getAllMemberGroups', () => {
         it('should return 400 when the member id is invalid', done => {
             callService()
-                .get(`/member/wrongId/group`)
+                .get(`/group/member/wrongId`)
                 .then(result => {
                      // Fail if we hit this spot
                     expect(false).to.be.true;
@@ -358,7 +358,7 @@ describe('group-api', () => {
             saveTestGroup()
                 .then(group => {
                     return callService()
-                            .get(`/member/${group.owner}/group`);
+                            .get(`/group/member/${group.owner}`);
                 })
                 .then(result => {
                     expect(result.status).to.be.eql(200);
@@ -386,7 +386,7 @@ describe('group-api', () => {
                 })
                 .then(result => {
                     return callService()
-                            .get(`/member/${groupData.owner}/group`);
+                            .get(`/group/member/${groupData.owner}`);
                 })
                 .then(result => {
                     const groups = result.body;
@@ -443,7 +443,7 @@ describe('group-api', () => {
                 })
                 .then(result => {
                     return callService()
-                            .get(`/member/${memberId}/group`);
+                            .get(`/group/member/${memberId}`);
                 })
                 .then(result => {
                     const groups = result.body;
@@ -459,7 +459,7 @@ describe('group-api', () => {
             saveTestMember()
                 .then(member => {
                     return callService()
-                            .get(`/member/${member._id}/group`);
+                            .get(`/group/member/${member._id}`);
                 })
                 .then(result => {
                     expect(result.body).to.be.an('array');
@@ -483,7 +483,7 @@ describe('group-api', () => {
                 })
                 .then(response => {
                     return callService()
-                            .get(`/member/${groupData.owner}/group`);
+                            .get(`/group/member/${groupData.owner}`);
                 })
                 .then(response => {
                     const { owner } = response.body[0];
