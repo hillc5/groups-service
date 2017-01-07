@@ -4,14 +4,12 @@ const groupData = require('../data-services/group-data'),
       validationType = 'group';
 
 function createGroup(req, res) {
-    const paramOptions = [ 'id' ],
-          bodyOptions = [ 'name', 'isPublic' ],
+    const bodyOptions = [ 'owner', 'name', 'isPublic' ],
           validationType = 'group';
 
-    validateRequest({ req, validationType, paramOptions, bodyOptions })
+    validateRequest({ req, validationType, bodyOptions })
         .then(() => {
-            const { id: owner } = req.params,
-                  { name, description='', tags, isPublic } = req.body,
+            const { owner, name, description='', tags, isPublic } = req.body,
 
                   newGroup = {
                      name,

@@ -373,8 +373,9 @@ describe('event-api', () => {
             saveTestMember()
                 .then(member => {
                     memberId = member._id;
+                    newGroup.owner = memberId;
                     return callService()
-                            .post(`/member/${memberId}/group`)
+                            .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
@@ -420,8 +421,9 @@ describe('event-api', () => {
             saveTestMember()
                 .then(member => {
                     memberId = member._id;
+                    newGroup.owner = memberId;
                     return callService()
-                            .post(`/member/${memberId}/group`)
+                            .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
@@ -481,8 +483,9 @@ describe('event-api', () => {
             saveTestMember()
                 .then(member => {
                     memberId = member._id;
+                    newGroupOne.owner = memberId;
                     return callService()
-                            .post(`/member/${memberId}/group`)
+                            .post('/group')
                             .send(newGroupOne);
                 })
                 .then(result => {
@@ -493,8 +496,9 @@ describe('event-api', () => {
                             .send(newEventOne);
                 })
                 .then(() => {
+                    newGroupTwo.owner = memberId;
                     return callService()
-                            .post(`/member/${memberId}/group`)
+                            .post('/group')
                             .send(newGroupTwo);
                 })
                 .then(result => {
@@ -541,8 +545,9 @@ describe('event-api', () => {
             saveTestMember()
                 .then(member => {
                     memberId = member._id;
+                    newGroup.owner = memberId;
                     return callService()
-                            .post(`/member/${memberId}/group`)
+                            .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
@@ -589,8 +594,9 @@ describe('event-api', () => {
             saveTestMember()
                 .then(member => {
                     memberId = member._id;
+                    newGroup.owner = memberId;
                     return callService()
-                            .post(`/member/${memberId}/group`)
+                            .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
@@ -633,8 +639,9 @@ describe('event-api', () => {
             saveTestMember()
                 .then(member => {
                     memberId = member._id;
+                    newGroup.owner = memberId;
                     return callService()
-                            .post(`/member/${memberId}/group`)
+                            .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
@@ -694,9 +701,9 @@ describe('event-api', () => {
             saveTestMember()
                 .then(member => {
                     memberId = member._id;
-
+                    newGroup.owner = memberId;
                     return callService()
-                            .post(`/member/${memberId}/group`)
+                            .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
@@ -733,9 +740,9 @@ describe('event-api', () => {
             saveTestMember()
                 .then(member => {
                     memberId = member._id;
-
+                    newGroup.owner = memberId;
                     return callService()
-                            .post(`/member/${memberId}/group`)
+                            .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
@@ -775,9 +782,9 @@ describe('event-api', () => {
             saveTestMember()
                 .then(member => {
                     savedMember = member;
-
+                    newGroup.owner = savedMember._id;
                     return callService()
-                            .post(`/member/${savedMember._id}/group`)
+                            .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
@@ -823,9 +830,9 @@ describe('event-api', () => {
             saveTestMember()
                 .then(member => {
                     savedMember = member;
-
+                    newGroup.owner = savedMember._id;
                     return callService()
-                            .post(`/member/${savedMember._id}/group`)
+                            .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
@@ -896,8 +903,9 @@ describe('event-api', () => {
             saveTestMember()
                 .then(member => {
                     memberId = member._id;
+                    newGroup.owner = memberId;
                     return callService()
-                            .post(`/member/${memberId}/group`)
+                            .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
@@ -933,8 +941,9 @@ describe('event-api', () => {
             saveTestMember()
                 .then(member => {
                     memberId = member._id;
+                    newGroup.owner = memberId;
                     return callService()
-                            .post(`/member/${memberId}/group`)
+                            .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
@@ -965,8 +974,9 @@ describe('event-api', () => {
             saveTestMember()
                 .then(member => {
                     memberId = member._id;
+                    newGroup.owner = memberId;
                     return callService()
-                            .post(`/member/${memberId}/group`)
+                            .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
@@ -1008,8 +1018,9 @@ describe('event-api', () => {
             saveTestMember()
                 .then(member => {
                     memberId = member._id;
+                    newGroup.owner = memberId;
                     return callService()
-                            .post(`/member/${memberId}/group`)
+                            .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
@@ -1063,16 +1074,16 @@ describe('event-api', () => {
                       endDate: new Date()
                   };
 
-            let memberOneId, memberTwoId, groupId;
+            let memberOne, memberTwo, groupId;
 
             callService()
                 .post('/member')
                 .send(newMemberOne)
                 .then(result => {
                     memberOne = result.body;
-
+                    newGroup.owner = memberOne._id;
                     return callService()
-                            .post(`/member/${memberOne._id}/group`)
+                            .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
@@ -1111,7 +1122,7 @@ describe('event-api', () => {
                     expect(savedEventTwo.name).to.be.eql(newEventTwo.name);
                     expect(savedEventTwo.creator.name).to.be.eql(memberTwo.name);
                     done();
-                })
+                });
         });
     });
 });
