@@ -79,7 +79,7 @@ const validationMap = {
         }
     },
     member: {
-        'id': sharedMappings.id('id'),
+        'memberId': sharedMappings.id('memberId'),
         'name': sharedMappings.name,
         'email': {
             isEmail: {

@@ -27,13 +27,13 @@ function createMember(req, res) {
 }
 
 function findMemberById(req, res) {
-    const paramOptions = [ 'id' ],
+    const paramOptions = [ 'memberId' ],
           validationType = 'member';
 
     validateRequest({ req, paramOptions, validationType })
         .then(() => {
-            const { id } = req.params,
-                  query = { _id: id },
+            const { memberId } = req.params,
+                  query = { _id: memberId },
                   // remove __v mongoose property
                   fields = '-__v',
                   groupOptions = {
@@ -76,7 +76,7 @@ function findMemberById(req, res) {
             if (result) {
                 res.status(200).send(result);
             } else {
-                throw { status: 404, message: `No member found with id ${req.params.id}` }
+                throw { status: 404, message: `No member found with id ${req.params.memberId}` }
             }
         })
         .catch(sendError(res));

@@ -120,8 +120,8 @@ describe('member-api', () => {
                 .catch(err => {
                     const error = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(400);
-                    expect(error.id).to.not.be.undefined;
-                    expect(error.id.param).to.be.eql('id');
+                    expect(error.memberId).to.not.be.undefined;
+                    expect(error.memberId.param).to.be.eql('memberId');
                     done();
                 });
         });
