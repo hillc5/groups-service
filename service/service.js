@@ -46,7 +46,7 @@ function startService() {
     // Group API
     app.post('/group', groupAPI.createGroup);
     app.get('/group/member/:memberId', groupAPI.getAllMemberGroups);
-    app.get('/group/:id', groupAPI.findGroupById);
+    app.get('/group/:groupId', groupAPI.findGroupById);
     app.post('/group/:groupId/member', groupAPI.addMemberToGroup);
     app.get('/group/', groupAPI.findGroupsByTags);
 

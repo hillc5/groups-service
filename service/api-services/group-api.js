@@ -96,13 +96,13 @@ function getAllMemberGroups(req, res) {
 }
 
 function findGroupById(req, res) {
-    const paramOptions = [ 'id' ],
+    const paramOptions = [ 'groupId' ],
           validationType = 'group';
 
     validateRequest({ req, validationType, paramOptions })
         .then(() => {
-            const { id } = req.params,
-                  query = { _id: id },
+            const { groupId } = req.params,
+                  query = { _id: groupId },
                   // remove __v mongoose property
                   fields = '-__v',
                   membersOptions = {
