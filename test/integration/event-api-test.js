@@ -906,7 +906,7 @@ describe('event-api', () => {
     describe('#getAllGroupEvents', () => {
         it('should return 400 if groupId is invalid', done => {
             callService()
-                .get('/group/wrongId/event')
+                .get('/event/group/wrongId')
                 .then(() => {
                     // Fail test if we hit this block
                     expect(false).to.be.true;
@@ -951,7 +951,7 @@ describe('event-api', () => {
                 })
                 .then(() => {
                     return callService()
-                            .get(`/group/${groupId}/event`);
+                            .get(`/event/group/${groupId}`);
                 })
                 .then(result => {
                     expect(result.status).to.be.eql(200);
@@ -979,7 +979,7 @@ describe('event-api', () => {
                 .then(result => {
                     groupId = result.body._id;
                     return callService()
-                            .get(`/group/${groupId}/event`);
+                            .get(`/event/group/${groupId}`);
                 })
                 .then(result => {
                     expect(result.status).to.be.eql(200);
@@ -1019,7 +1019,7 @@ describe('event-api', () => {
                 })
                 .then(() => {
                     return callService()
-                            .get(`/group/${groupId}/event`);
+                            .get(`/event/group/${groupId}`);
                 })
                 .then(result => {
                     const { body: events } = result;
@@ -1072,7 +1072,7 @@ describe('event-api', () => {
                 })
                 .then(() => {
                     return callService()
-                            .get(`/group/${groupId}/event`);
+                            .get(`/event/group/${groupId}`);
                 })
                 .then(result => {
                     const { body: events } = result;
@@ -1153,7 +1153,7 @@ describe('event-api', () => {
                 })
                 .then(() => {
                     return callService()
-                            .get(`/group/${groupId}/event`);
+                            .get(`/event/group/${groupId}`);
                 })
                 .then(result => {
                     const { body: events } = result;
