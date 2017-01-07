@@ -27,11 +27,13 @@ describe('event-api', () => {
             const newEvent = {
                   name: 'Test Event',
                   startDate: Date.now(),
-                  endDate: Date.now()
+                  endDate: Date.now(),
+                  memberId: testGroupData.owner,
+                  groupId: 'wrongId'
               };
 
             callService()
-                .post(`/group/wrongId/member/${testGroupData.owner}/event`)
+                .post('/event')
                 .send(newEvent)
                 .then(() => {
                     // Fail test if we hit this block
@@ -50,11 +52,13 @@ describe('event-api', () => {
             const newEvent = {
                       name: 'Test Event',
                       startDate: Date.now(),
-                      endDate: Date.now()
+                      endDate: Date.now(),
+                      groupId: testGroupData.owner,
+                      memberId: 'wrongId'
                   };
 
             callService()
-                .post(`/group/${testGroupData.owner}/member/wrongId/event`)
+                .post('/event')
                 .send(newEvent)
                 .then(() => {
                     // Fail test if we hit this block
@@ -72,11 +76,13 @@ describe('event-api', () => {
         it('should return 400 if event name is missing', done => {
             const newEvent = {
                       startDate: Date.now(),
-                      endDate: Date.now()
+                      endDate: Date.now(),
+                      groupId: testGroupData.owner,
+                      memberId: testGroupData.owner
                   };
 
             callService()
-                .post(`/group/${testGroupData.owner}/member/${testGroupData.owner}/event`)
+                .post('/event')
                 .send(newEvent)
                 .then(() => {
                     // Fail test if we hit this block
@@ -94,11 +100,13 @@ describe('event-api', () => {
         it('should return 400 if event startDate is missing', done => {
             const newEvent = {
                       name: 'Test Event',
-                      endDate: Date.now()
+                      endDate: Date.now(),
+                      groupId: testGroupData.owner,
+                      memberId: testGroupData.owner
                   };
 
             callService()
-                .post(`/group/${testGroupData.owner}/member/${testGroupData.owner}/event`)
+                .post('/event')
                 .send(newEvent)
                 .then(() => {
                     // Fail test if we hit this block
@@ -116,11 +124,13 @@ describe('event-api', () => {
         it('should return 400 if event endDate is missing', done => {
             const newEvent = {
                       name: 'Test Event',
-                      startDate: Date.now()
+                      startDate: Date.now(),
+                      groupId: testGroupData.owner,
+                      memberId: testGroupData.owner
                   };
 
             callService()
-                .post(`/group/${testGroupData.owner}/member/${testGroupData.owner}/event`)
+                .post('/event')
                 .send(newEvent)
                 .then(() => {
                     // Fail test if we hit this block
@@ -147,12 +157,14 @@ describe('event-api', () => {
             saveTestMember()
                 .then(member => {
                     memberId = member._id;
+                    newEvent.memberId = memberId;
                     return saveTestGroup();
                 })
                 .then(group => {
                     groupId = group._id;
+                    newEvent.groupId = groupId;
                     return callService()
-                            .post(`/group/${groupId}/member/${memberId}/event`)
+                            .post('/event')
                             .send(newEvent);
                 })
                 .then(result => {
@@ -176,12 +188,14 @@ describe('event-api', () => {
             saveTestMember()
                 .then(member => {
                     memberId = member._id;
+                    newEvent.memberId = memberId;
                     return saveTestGroup();
                 })
                 .then(group => {
                     groupId = group._id;
+                    newEvent.groupId = groupId;
                     return callService()
-                            .post(`/group/${groupId}/member/${memberId}/event`)
+                            .post('/event')
                             .send(newEvent);
                 })
                 .then(result => {
@@ -216,12 +230,14 @@ describe('event-api', () => {
             saveTestMember()
                 .then(member => {
                     memberId = member._id;
+                    newEvent.memberId = memberId;
                     return saveTestGroup();
                 })
                 .then(group => {
                     groupId = group._id;
+                    newEvent.groupId = groupId;
                     return callService()
-                            .post(`/group/${groupId}/member/${memberId}/event`)
+                            .post('/event')
                             .send(newEvent);
                 })
                 .then(result => {
@@ -246,12 +262,14 @@ describe('event-api', () => {
             saveTestMember()
                 .then(member => {
                     memberId = member._id;
+                    newEvent.memberId = memberId;
                     return saveTestGroup();
                 })
                 .then(group => {
                     groupId = group._id;
+                    newEvent.groupId = groupId;
                     return callService()
-                            .post(`/group/${groupId}/member/${memberId}/event`)
+                            .post('/event')
                             .send(newEvent);
                 })
                 .then(result => {
@@ -281,6 +299,7 @@ describe('event-api', () => {
             saveTestMember()
                 .then(member => {
                     memberOneId = member._id;
+                    newEvent.memberId = memberOneId;
                     return callService()
                             .post(`/member`)
                             .send(newMember);
@@ -292,8 +311,9 @@ describe('event-api', () => {
                 .then(group => {
                     newEvent.invitees.push(memberOneId);
                     newEvent.invitees.push(memberTwoId);
+                    newEvent.groupId = group._id;
                     return callService()
-                            .post(`/group/${group._id}/member/${memberOneId}/event`)
+                            .post('/event')
                             .send(newEvent);
                 })
                 .then(result => {
@@ -303,8 +323,7 @@ describe('event-api', () => {
                     expect(mongoose.mongo.ObjectId(invitees[0])).to.be.eql(memberOneId);
                     expect(mongoose.mongo.ObjectId(invitees[1])).to.be.eql(memberTwoId);
                     done();
-                })
-                .catch(err => console.log(err));
+                });
         });
 
     });
@@ -374,15 +393,16 @@ describe('event-api', () => {
                 .then(member => {
                     memberId = member._id;
                     newGroup.owner = memberId;
+                    newEvent.memberId = memberId;
                     return callService()
                             .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
                     const { _id: groupId } = result.body;
-
+                    newEvent.groupId = groupId;
                     return callService()
-                            .post(`/group/${groupId}/member/${memberId}/event`)
+                            .post('/event')
                             .send(newEvent);
                 })
                 .then(() => {
@@ -422,20 +442,23 @@ describe('event-api', () => {
                 .then(member => {
                     memberId = member._id;
                     newGroup.owner = memberId;
+                    newEventOne.memberId = memberId;
+                    newEventTwo.memberId = memberId;
                     return callService()
                             .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
                     groupId = result.body._id;
-
+                    newEventOne.groupId = groupId;
+                    newEventTwo.groupId = groupId;
                     return callService()
-                            .post(`/group/${groupId}/member/${memberId}/event`)
+                            .post('/event')
                             .send(newEventOne);
                 })
                 .then(() => {
                     return callService()
-                            .post(`/group/${groupId}/member/${memberId}/event`)
+                            .post('/event')
                             .send(newEventTwo);
                 })
                 .then(() => {
@@ -484,15 +507,17 @@ describe('event-api', () => {
                 .then(member => {
                     memberId = member._id;
                     newGroupOne.owner = memberId;
+                    newEventOne.memberId = memberId;
+                    newEventTwo.memberId = memberId;
                     return callService()
                             .post('/group')
                             .send(newGroupOne);
                 })
                 .then(result => {
                     groupIdOne = result.body._id;
-
+                    newEventOne.groupId = groupIdOne;
                     return callService()
-                            .post(`/group/${groupIdOne}/member/${memberId}/event`)
+                            .post('/event')
                             .send(newEventOne);
                 })
                 .then(() => {
@@ -503,9 +528,9 @@ describe('event-api', () => {
                 })
                 .then(result => {
                     groupIdTwo = result.body._id;
-
+                    newEventTwo.groupId = groupIdTwo;
                     return callService()
-                            .post(`/group/${groupIdTwo}/member/${memberId}/event`)
+                            .post('/event')
                             .send(newEventTwo);
                 })
                 .then(() => {
@@ -546,15 +571,16 @@ describe('event-api', () => {
                 .then(member => {
                     memberId = member._id;
                     newGroup.owner = memberId;
+                    newEvent.memberId = memberId;
                     return callService()
                             .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
                     const { _id: groupId } = result.body;
-
+                    newEvent.groupId = groupId;
                     return callService()
-                            .post(`/group/${groupId}/member/${memberId}/event`)
+                            .post('/event')
                             .send(newEvent);
                 })
                 .then(() => {
@@ -595,15 +621,16 @@ describe('event-api', () => {
                 .then(member => {
                     memberId = member._id;
                     newGroup.owner = memberId;
+                    newEvent.memberId = memberId;
                     return callService()
                             .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
                     const { _id: groupId } = result.body;
-
+                    newEvent.groupId = groupId;
                     return callService()
-                            .post(`/group/${groupId}/member/${memberId}/event`)
+                            .post('/event')
                             .send(newEvent);
                 })
                 .then(() => {
@@ -640,15 +667,16 @@ describe('event-api', () => {
                 .then(member => {
                     memberId = member._id;
                     newGroup.owner = memberId;
+                    newEvent.memberId = memberId;
                     return callService()
                             .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
                     const { _id: groupId } = result.body;
-
+                    newEvent.groupId = groupId;
                     return callService()
-                            .post(`/group/${groupId}/member/${memberId}/event`)
+                            .post('/event')
                             .send(newEvent);
                 })
                 .then(() => {
@@ -702,15 +730,16 @@ describe('event-api', () => {
                 .then(member => {
                     memberId = member._id;
                     newGroup.owner = memberId;
+                    newEvent.memberId = memberId;
                     return callService()
                             .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
                     groupId = result.body._id;
-
+                    newEvent.groupId = groupId;
                     return callService()
-                            .post(`/group/${groupId}/member/${memberId}/event`)
+                            .post('/event')
                             .send(newEvent);
                 })
                 .then(result => {
@@ -741,15 +770,16 @@ describe('event-api', () => {
                 .then(member => {
                     memberId = member._id;
                     newGroup.owner = memberId;
+                    newEvent.memberId = memberId;
                     return callService()
                             .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
                     groupId = result.body._id;
-
+                    newEvent.groupId = groupId;
                     return callService()
-                            .post(`/group/${groupId}/member/${memberId}/event`)
+                            .post('/event')
                             .send(newEvent);
                 })
                 .then(result => {
@@ -783,15 +813,16 @@ describe('event-api', () => {
                 .then(member => {
                     savedMember = member;
                     newGroup.owner = savedMember._id;
+                    newEvent.memberId = savedMember._id;
                     return callService()
                             .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
                     groupId = result.body._id;
-
+                    newEvent.groupId = groupId;
                     return callService()
-                            .post(`/group/${groupId}/member/${savedMember._id}/event`)
+                            .post('/event')
                             .send(newEvent);
                 })
                 .then(result => {
@@ -831,12 +862,14 @@ describe('event-api', () => {
                 .then(member => {
                     savedMember = member;
                     newGroup.owner = savedMember._id;
+                    newEvent.memberId = savedMember._id;
                     return callService()
                             .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
                     groupId = result.body._id;
+                    newEvent.groupId = groupId;
                     return callService()
                             .post('/member')
                             .send(newMember);
@@ -846,7 +879,7 @@ describe('event-api', () => {
                     newEvent.invitees = [];
                     newEvent.invitees.push(invitee._id);
                     return callService()
-                            .post(`/group/${groupId}/member/${savedMember._id}/event`)
+                            .post('/event')
                             .send(newEvent);
                 })
                 .then(result => {
@@ -904,14 +937,16 @@ describe('event-api', () => {
                 .then(member => {
                     memberId = member._id;
                     newGroup.owner = memberId;
+                    newEvent.memberId = memberId;
                     return callService()
                             .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
                     groupId = result.body._id;
+                    newEvent.groupId = groupId;
                     return callService()
-                            .post(`/group/${groupId}/member/${memberId}/event`)
+                            .post('/event')
                             .send(newEvent);
                 })
                 .then(() => {
@@ -929,11 +964,6 @@ describe('event-api', () => {
             const newGroup = {
                       name: 'Test Group',
                       isPublic: true
-                  },
-                  newEvent = {
-                      name: 'Test Event',
-                      startDate: new Date(),
-                      endDate: new Date()
                   };
 
             let memberId, groupId;
@@ -975,14 +1005,16 @@ describe('event-api', () => {
                 .then(member => {
                     memberId = member._id;
                     newGroup.owner = memberId;
+                    newEvent.memberId = memberId;
                     return callService()
                             .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
                     groupId = result.body._id;
+                    newEvent.groupId = groupId;
                     return callService()
-                            .post(`/group/${groupId}/member/${memberId}/event`)
+                            .post('/event')
                             .send(newEvent);
                 })
                 .then(() => {
@@ -1019,19 +1051,23 @@ describe('event-api', () => {
                 .then(member => {
                     memberId = member._id;
                     newGroup.owner = memberId;
+                    newEventOne.memberId = memberId;
+                    newEventTwo.memberId = memberId;
                     return callService()
                             .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
                     groupId = result.body._id;
+                    newEventOne.groupId = groupId;
+                    newEventTwo.groupId = groupId;
                     return callService()
-                            .post(`/group/${groupId}/member/${memberId}/event`)
+                            .post('/event')
                             .send(newEventOne);
                 })
                 .then(() => {
                     return callService()
-                            .post(`/group/${groupId}/member/${memberId}/event`)
+                            .post('/event')
                             .send(newEventTwo);
                 })
                 .then(() => {
@@ -1082,15 +1118,17 @@ describe('event-api', () => {
                 .then(result => {
                     memberOne = result.body;
                     newGroup.owner = memberOne._id;
+                    newEventOne.memberId = memberOne._id;
                     return callService()
                             .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
                     groupId = result.body._id;
-
+                    newEventOne.groupId = groupId;
+                    newEventTwo.groupId = groupId;
                     return callService()
-                            .post(`/group/${groupId}/member/${memberOne._id}/event`)
+                            .post('/event')
                             .send(newEventOne);
                 })
                 .then(() => {
@@ -1100,6 +1138,7 @@ describe('event-api', () => {
                 })
                 .then(result => {
                     memberTwo = result.body;
+                    newEventTwo.memberId = memberTwo._id;
                     let member = {
                         memberId: memberTwo._id
                     };
@@ -1109,7 +1148,7 @@ describe('event-api', () => {
                 })
                 .then(() => {
                     return callService()
-                            .post(`/group/${groupId}/member/${memberTwo._id}/event`)
+                            .post('/event')
                             .send(newEventTwo);
                 })
                 .then(() => {

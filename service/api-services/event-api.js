@@ -3,14 +3,12 @@ const eventData = require('../data-services/event-data'),
       validationType = 'event';
 
 function createEvent(req, res) {
-    const paramOptions = [ 'groupId', 'memberId' ],
-          bodyOptions = [ 'name', 'startDate', 'endDate' ],
+    const bodyOptions = [ 'name', 'startDate', 'endDate', 'groupId', 'memberId' ],
           validationType = 'event';
 
-    validateRequest({ req, validationType, paramOptions, bodyOptions })
+    validateRequest({ req, validationType, bodyOptions })
         .then(() => {
-            const { groupId, memberId } = req.params,
-                  { name, startDate, endDate, invitees=[] } = req.body,
+            const { name, startDate, endDate, invitees=[], groupId, memberId } = req.body,
                   newEvent = {
                       name,
                       group: groupId,
