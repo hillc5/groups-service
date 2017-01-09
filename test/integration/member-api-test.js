@@ -10,6 +10,10 @@ const mongoose = require('mongoose'),
 
 chai.use(chaiHttp);
 
+function callService() {
+    return chai.request(service);
+}
+
 describe('member-api', () => {
 
     afterEach(done => {
@@ -180,6 +184,138 @@ describe('member-api', () => {
                     done();
                 });
 
+        });
+    });
+
+    describe('#getAllMemberGroups', () => {
+        it('should return 400 if incorrect memberId is given', done => {
+            callService()
+                .get('/member/wrongId/groups')
+                .then(result => {
+                    // Fail if we hit this spot
+                    expect(false).to.be.true;
+                    done();
+                })
+                .catch(err => {
+                    expect(err.status).to.be.eql(400);
+                    done();
+                })
+        });
+
+        it('should return 200 if call is successful', done => {
+            saveTestMember()
+                .then(member => {
+                    return callService()
+                            .get(`/member/${member._id}/groups`);
+                })
+                .then(result => {
+                    expect(result.status).to.be.eql(200);
+                    done();
+                });
+        });
+
+        it('should return an empty array if the member has no groups', done => {
+            saveTestMember()
+                .then(member => {
+                    return callService()
+                            .get(`/member/${member._id}/groups`);
+                })
+                .then(result => {
+                    expect(result.status).to.be.eql(200);
+                    expect(result.body).to.be.eql([]);
+                    done();
+                });
+        });
+
+        it('should return all groups that a member owns', done => {
+            const groupData = {
+                    name: 'Test Group',
+                    isPublic: true
+                };
+
+            saveTestMember()
+                .then(member => {
+                    groupData.owner = member._id;
+                    return callService()
+                            .post('/group')
+                            .send(groupData);
+                })
+                .then(result => {
+                    return callService()
+                            .post('/group')
+                            .send(groupData);
+                })
+                .then(result => {
+                    return callService()
+                            .get(`/member/${groupData.owner}/groups`);
+                })
+                .then(result => {
+                    const groups = result.body;
+                    expect(groups.length).to.be.eql(2);
+                    expect(groups[0]._id).to.not.be.eql(groups[1]._id);
+                    done();
+                });
+        });
+
+        it('should return all groups to which a member belongs', done => {
+            let memberId,
+                ownerData = {
+                    name: 'Owner',
+                    email: 'Owner@owner.com'
+                },
+                groupOneData = {
+                    name: 'group one',
+                    isPublic: true
+                },
+                groupTwoData = {
+                    name: 'group two',
+                    isPublic: true
+                },
+                groupOneId, groupTwoId;
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+                    return callService()
+                            .post('/member')
+                            .send(ownerData);
+                })
+                .then(result => {
+                    groupOneData.owner = result.body._id;
+                    groupTwoData.owner = result.body._id;
+                    return callService()
+                            .post('/group')
+                            .send(groupOneData);
+                })
+                .then(result => {
+                    let { _id: groupId } = result.body;
+                    return callService()
+                            .post(`/group/${groupId}/member`)
+                            .send({ memberId });
+                })
+                .then(result => {
+                    return callService()
+                            .post('/group')
+                            .send(groupTwoData);
+                })
+                .then(result => {
+                    let { _id: groupId } = result.body;
+                    return callService()
+                            .post(`/group/${groupId}/member`)
+                            .send({ memberId });
+                })
+                .then(result => {
+                    return callService()
+                            .get(`/member/${memberId}/groups`);
+                })
+                .then(result => {
+                    const groups = result.body;
+                    expect(groups.length).to.be.eql(2);
+                    groups.forEach(group => {
+                        expect(mongoose.mongo.ObjectId(group.owner._id)).to.not.be.eql(memberId);
+                    });
+                    done();
+                })
         });
     });
 });

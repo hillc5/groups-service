@@ -49,52 +49,6 @@ function addMemberToGroup(req, res) {
         .catch(sendError(res));
 }
 
-function getAllMemberGroups(req, res) {
-    const paramOptions = [ 'memberId' ],
-          validationType = 'group';
-
-    validateRequest({ req, validationType, paramOptions })
-        .then(() => {
-            const { memberId } = req.params,
-                  query = { members: mongoose.mongo.ObjectId(memberId) },
-                  fields = '-__v',
-                  membersOptions = {
-                      path: 'members',
-                      select: 'name email joinDate'
-                  },
-                  eventsOptions = {
-                      path: 'events',
-                      populate: {
-                          path: 'creator',
-                          select: 'name'
-                      }
-                  },
-                  postsOptions = {
-                      path: 'posts',
-                      populate: {
-                          path: 'owner',
-                          select: 'name'
-                      }
-                  },
-                  ownerOptions = {
-                      path: 'owner',
-                      select: 'name email joinDate'
-                  },
-                  refOptions = [ membersOptions, eventsOptions, postsOptions, ownerOptions ];
-
-            return groupData.findGroups(query, fields, refOptions);
-        })
-        .then(result => {
-            if (result) {
-                res.status(200).send(result);
-            } else {
-                throw { status: 404, message: `No groups found for owner: ${req.params.id}` };
-            }
-
-        })
-        .catch(sendError(res));
-}
-
 function findGroupById(req, res) {
     const paramOptions = [ 'groupId' ],
           validationType = 'group';
@@ -182,6 +136,5 @@ module.exports = {
     createGroup,
     addMemberToGroup,
     findGroupById,
-    findGroupsByTags,
-    getAllMemberGroups
+    findGroupsByTags
 };

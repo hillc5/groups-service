@@ -21,7 +21,17 @@ function findMember(query, fields, refOptions) {
     return memberQuery.exec();
 }
 
+function findMembers(query, fields, refOptions) {
+    let memberQuery = Member.find(query)
+                            .select(fields)
+                            .populate(refOptions);
+
+    logger.info(`{DATA_NAME} - find member by ${JSON.stringify(query)}`);
+    return memberQuery.exec();
+}
+
 module.exports = {
     saveMember,
-    findMember
+    findMember,
+    findMembers
 };

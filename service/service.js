@@ -33,10 +33,10 @@ function startService() {
     // Member API
     app.post('/member', memberAPI.createMember);
     app.get('/member/:memberId', memberAPI.findMemberById);
+    app.get('/member/:memberId/groups', memberAPI.getAllMemberGroups);
 
     // Group API
     app.post('/group', groupAPI.createGroup);
-    app.get('/group/member/:memberId', groupAPI.getAllMemberGroups);
     app.get('/group/:groupId', groupAPI.findGroupById);
     app.post('/group/:groupId/member', groupAPI.addMemberToGroup);
     app.get('/group/', groupAPI.findGroupsByTags);

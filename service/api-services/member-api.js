@@ -26,6 +26,55 @@ function createMember(req, res) {
         .catch(sendError(res));
 }
 
+function getAllMemberGroups(req, res) {
+    const paramOptions = [ 'memberId' ],
+          validationType = 'member';
+
+    validateRequest({ req, paramOptions, validationType })
+        .then(() => {
+            const { memberId } = req.params,
+                  query = { _id: memberId },
+                  fields = 'memberGroups -_id',
+                  memberGroupOptions = {
+                      path: 'memberGroups',
+                      select: '-__v',
+                      populate: [
+                          {
+                              path: 'owner',
+                              select: 'name email'
+                          },
+                          {
+                              path: 'members',
+                              select: 'name email'
+                          },
+                          {
+                              path: 'posts',
+                              select: 'title text postDate',
+                              options: { sort: { postDate: -1 }, limit: 10 }
+                          },
+                          {
+                              path: 'events',
+                              select: 'name invitees attendees startDate endDate',
+                              options: { sort: { startDate: -1 }, limit: 10 }
+                          }
+                      ]
+                  },
+                  refOptions = [ memberGroupOptions ];
+
+            return memberData.findMember(query, fields, refOptions);
+        })
+        .then(result => {
+            if (result) {
+                const { memberGroups=[] } = result;
+                res.status(200).send(memberGroups);
+            } else {
+                throw { status: 404, message: `No groups found for member: ${req.params.memberId}` };
+            }
+
+        })
+        .catch(sendError(res));
+}
+
 function findMemberById(req, res) {
     const paramOptions = [ 'memberId' ],
           validationType = 'member';
@@ -74,6 +123,7 @@ function findMemberById(req, res) {
         })
         .then(result => {
             if (result) {
+
                 res.status(200).send(result);
             } else {
                 throw { status: 404, message: `No member found with id ${req.params.memberId}` }
@@ -84,5 +134,6 @@ function findMemberById(req, res) {
 
 module.exports = {
     createMember,
-    findMemberById
+    findMemberById,
+    getAllMemberGroups
 }
