@@ -111,11 +111,11 @@ function findMemberById(req, res) {
                   },
                   postOptions = {
                       path: 'memberPosts',
-                      select: 'title text date'
+                      select: '-__v'
                   },
                   eventOptions = {
                       path: 'memberEvents',
-                      select: 'name startDate endDate'
+                      select: '-__v'
                   },
                   refOptions = [ groupOptions, postOptions, eventOptions ];
 

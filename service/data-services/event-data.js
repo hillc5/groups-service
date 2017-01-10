@@ -25,6 +25,17 @@ function saveEvent(eventData) {
             .then(group => {
                 group.events.push({ _id: eventId });
                 group.save();
+                return Member.find({ _id: { $in: result.invitees }});
+            })
+            .then(members => {
+                if (members) {
+                    members.forEach(member => {
+                        if (!member._id.equals(result.creator)) {
+                            member.memberEvents.push({ _id: eventId });
+                            member.save();
+                        }
+                    });
+                }
                 return result;
             });
 }

@@ -218,6 +218,50 @@ describe('event-api', () => {
                 });
         });
 
+        it('should allow invitees to be added on creation', done => {
+            const newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date(),
+                      invitees: []
+                  },
+                  newMember = {
+                      name: 'Test',
+                      email: 'Bill@Bob.com'
+                  };
+
+            let memberOneId, memberTwoId;
+
+            saveTestMember()
+                .then(member => {
+                    memberOneId = member._id;
+                    newEvent.memberId = memberOneId;
+                    return callService()
+                            .post(`/member`)
+                            .send(newMember);
+                })
+                .then(result => {
+                    memberTwoId = mongoose.mongo.ObjectId(result.body._id);
+                    return saveTestGroup();
+                })
+                .then(group => {
+                    newEvent.invitees.push(memberOneId);
+                    newEvent.invitees.push(memberTwoId);
+                    newEvent.groupId = group._id;
+                    return callService()
+                            .post('/event')
+                            .send(newEvent);
+                })
+                .then(result => {
+                    const { body: event } = result,
+                          { invitees } = event;
+
+                    expect(mongoose.mongo.ObjectId(invitees[0])).to.be.eql(memberOneId);
+                    expect(mongoose.mongo.ObjectId(invitees[1])).to.be.eql(memberTwoId);
+                    done();
+                });
+        });
+
         it('should store eventId in the creating members memberEvents array', done => {
             const newEvent = {
                       name: 'Test Event',
@@ -282,7 +326,7 @@ describe('event-api', () => {
                 });
         });
 
-        it('should allow invitees to be added on creation', done => {
+        it('should store eventId in memberEvents array for all invitees', done => {
             const newEvent = {
                       name: 'Test Event',
                       startDate: new Date(),
@@ -294,7 +338,7 @@ describe('event-api', () => {
                       email: 'Bill@Bob.com'
                   };
 
-            let memberOneId, memberTwoId;
+            let memberOneId, memberTwoId, eventId;
 
             saveTestMember()
                 .then(member => {
@@ -320,8 +364,30 @@ describe('event-api', () => {
                     const { body: event } = result,
                           { invitees } = event;
 
+                    eventId = event._id;
+
                     expect(mongoose.mongo.ObjectId(invitees[0])).to.be.eql(memberOneId);
                     expect(mongoose.mongo.ObjectId(invitees[1])).to.be.eql(memberTwoId);
+
+                    return callService()
+                            .get(`/member/${memberOneId}`);
+                })
+                .then(result => {
+                    const { memberEvents } = result.body,
+                          [ event ] = memberEvents,
+                          { _id: memberEventId } = event;
+
+                    expect(memberEventId).to.be.eql(eventId);
+
+                    return callService()
+                            .get(`/member/${memberTwoId}`);
+                })
+                .then(result => {
+                    const { memberEvents } = result.body,
+                          [ event ] = memberEvents,
+                          { _id: memberEventId } = event;
+
+                    expect(memberEventId).to.be.eql(eventId);
                     done();
                 });
         });
