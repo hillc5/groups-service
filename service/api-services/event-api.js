@@ -74,52 +74,6 @@ function getEventById(req, res) {
         .catch(sendError(res));
 }
 
-function getAllMemberCreatedEvents(req, res) {
-    const paramOptions = [ 'memberId' ],
-          validationType = 'event';
-
-    validateRequest({ req, validationType, paramOptions })
-        .then(() => {
-            const { memberId } = req.params,
-                  query = { creator: memberId },
-                  // remove __v mongoose property
-                  fields = '-__v',
-                  groupOptions = {
-                      path: 'group',
-                      select: 'name'
-                  },
-                  creatorOptions = {
-                      path: 'creator',
-                      select: 'name email'
-                  },
-                  inviteesOptions = {
-                      path: 'invitees',
-                      select: 'name email'
-                  },
-                  attendeesOptions = {
-                      path: 'attendees',
-                      select: 'name email'
-                  },
-                  postOptions = {
-                      path: 'posts',
-                      select: '-__v'
-                  },
-                  refOptions = [ groupOptions, creatorOptions, inviteesOptions, attendeesOptions, postOptions ];
-
-            return eventData.findEvents(query, fields, refOptions);
-
-        })
-        .then(result => {
-            if (result) {
-                res.status(200).send(result);
-            } else {
-                throw { status: 404, message: `No events found for member: ${req.params.memberId}` };
-            }
-
-        })
-        .catch(sendError(res));
-}
-
 function getAllGroupEvents(req, res) {
     const paramOptions = [ 'groupId' ],
           validationType = 'event';
@@ -167,7 +121,6 @@ function getAllGroupEvents(req, res) {
 
 module.exports = {
     createEvent,
-    getAllMemberCreatedEvents,
     getAllGroupEvents,
     getEventById
 };

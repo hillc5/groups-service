@@ -75,6 +75,57 @@ function getAllMemberGroups(req, res) {
         .catch(sendError(res));
 }
 
+function getAllMemberEvents(req, res) {
+    const paramOptions = [ 'memberId' ],
+          validationType = 'member';
+
+    validateRequest({ req, paramOptions, validationType })
+        .then(() => {
+            const { memberId } = req.params,
+                  query = { _id: memberId },
+                  fields = 'memberEvents -_id',
+                  memberEventsOptions = {
+                      path: 'memberEvents',
+                      select: '-__v',
+                      populate: [
+                          {
+                              path: 'creator',
+                              select: 'name email joinDate'
+                          },
+                          {
+                              path:  'invitees',
+                              select: 'name email joinDate'
+                          },
+                          {
+                              path: 'attendees',
+                              select: 'name email joinDate'
+                          },
+                          {
+                              path: 'posts',
+                              select: 'title text owner postDate replies'
+                          },
+                          {
+                              path: 'group',
+                              select: 'name tags'
+                          }
+                      ]
+                  },
+                  refOptions = [ memberEventsOptions ];
+
+            return memberData.findMember(query, fields, refOptions);
+        })
+        .then(result => {
+            if (result) {
+                const { memberEvents=[] } = result;
+                res.status(200).send(memberEvents);
+            } else {
+                throw { status: 404, message: `No groups found for member: ${req.params.memberId}` };
+            }
+
+        })
+        .catch(sendError(res));
+}
+
 function findMemberById(req, res) {
     const paramOptions = [ 'memberId' ],
           validationType = 'member';
@@ -135,5 +186,6 @@ function findMemberById(req, res) {
 module.exports = {
     createMember,
     findMemberById,
-    getAllMemberGroups
+    getAllMemberGroups,
+    getAllMemberEvents
 }

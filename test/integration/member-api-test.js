@@ -318,4 +318,377 @@ describe('member-api', () => {
                 })
         });
     });
+
+    describe('#getAllMemberEvents', () => {
+        it('should return 400 if memberId is not a valid Mongo ObjectId', done => {
+            callService()
+                .get('/member/wrongId/events')
+                .then(result => {
+                    // Fail if we hit this spot
+                    expect(false).to.be.true;
+                    done();
+                })
+                .catch(err => {
+                    expect(err.status).to.be.eql(400);
+                    done();
+                })
+        });
+
+        it('should return 200 if call is successful', done => {
+            let memberId;
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+
+                    return callService()
+                            .get(`/member/${memberId}/events`);
+                })
+                .then(result => {
+                    expect(result.status).to.be.eql(200);
+                    done();
+                });
+        });
+
+        it('should return an empty array if the member has no events', done => {
+            let memberId;
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+
+                    return callService()
+                            .get(`/member/${memberId}/events`);
+                })
+                .then(result => {
+                    expect(result.status).to.be.eql(200);
+                    expect(result.body).to.be.eql([]);
+                    done();
+                });
+        });
+
+        it('should return all events that a member creates', done => {
+            const newTestGroup = {
+                      name: 'Test Group',
+                      isPublic: true
+                  },
+                  newTestEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  }
+
+            let memberId, groupId;
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+                    newTestGroup.owner = memberId;
+
+                    return callService()
+                            .post('/group')
+                            .send(newTestGroup);
+                })
+                .then(result => {
+                    groupId = result.body._id;
+
+                    newTestEvent.memberId = memberId;
+                    newTestEvent.groupId = groupId;
+                    return callService()
+                            .post('/event')
+                            .send(newTestEvent);
+                })
+                .then(() => {
+                    return callService()
+                            .get(`/member/${memberId}/events`);
+                })
+                .then(result => {
+                    const { body: events } = result,
+                          [ event ] = events;
+
+                    expect(mongoose.mongo.ObjectId(event.creator._id)).to.be.eql(memberId);
+                    done();
+                });
+        });
+
+        it('should return all events that a member has been invited to', done => {
+            const newTestGroup = {
+                      name: 'Test Group',
+                      isPublic: true
+                  },
+                  newTestEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  },
+                  newTestMember = {
+                      name: 'Test Member',
+                      email: 'Test@TestMmember.com'
+                  };
+
+            let creatorId, memberId, groupId;
+
+            saveTestMember()
+                .then(member => {
+                    creatorId = member._id;
+                    newTestGroup.owner = creatorId;
+
+                    return callService()
+                            .post('/group')
+                            .send(newTestGroup);
+                })
+                .then(result => {
+                    groupId = result.body._id;
+
+                    return callService()
+                            .post('/member')
+                            .send(newTestMember);
+                })
+                .then(result => {
+                    memberId = result.body._id
+                    newTestEvent.memberId = creatorId;
+                    newTestEvent.groupId = groupId;
+                    newTestEvent.invitees = [ memberId ];
+                    return callService()
+                            .post('/event')
+                            .send(newTestEvent);
+                })
+                .then(() => {
+                    return callService()
+                            .get(`/member/${memberId}/events`);
+                })
+                .then(result => {
+                    const { body: events } = result,
+                          [ event ] = events,
+                          { invitees } = event,
+                          [ invitedMember ] = invitees;
+
+                    expect(invitedMember._id).to.be.eql(memberId);
+                    done();
+                });
+        });
+
+        it('should return all member events across multiple groups', done => {
+            const testGroupOne = {
+                      name: 'Test Group One',
+                      isPublic: true
+                  },
+                  testGroupTwo = {
+                      name: 'Test Group Two',
+                      isPublic: true
+                  },
+                  testEventOne = {
+                      name: 'Test Event One',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  },
+                  testEventTwo = {
+                      name: 'Test Event Two',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            let memberId, groupOneId, groupTwoId;
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+                    testGroupOne.owner = memberId;
+                    testGroupTwo.owner = memberId;
+                    testEventOne.memberId = memberId;
+                    testEventTwo.memberId = memberId;
+
+                    return callService()
+                            .post('/group')
+                            .send(testGroupOne);
+                })
+                .then(result => {
+                    groupOneId = result.body._id;
+                    testEventOne.groupId = groupOneId;
+                    return callService()
+                            .post('/group')
+                            .send(testGroupTwo);
+                })
+                .then(result => {
+                    groupTwoId = result.body._id;
+                    testEventTwo.groupId = groupTwoId;
+
+                    return callService()
+                            .post('/event')
+                            .send(testEventOne);
+                })
+                .then(() => {
+                    return callService()
+                            .post('/event')
+                            .send(testEventTwo);
+                })
+                .then(() => {
+                    return callService()
+                            .get(`/member/${memberId}/events`);
+                })
+                .then(result => {
+                    const { body: events } = result,
+                          [ eventOne, eventTwo ] = events;
+
+                    expect(mongoose.mongo.ObjectId(eventOne.creator._id)).to.be.eql(memberId);
+                    expect(mongoose.mongo.ObjectId(eventTwo.creator._id)).to.be.eql(memberId);
+                    done();
+                });
+        });
+
+        it('should return the name email and joinDate for the creator', done => {
+            const newTestGroup = {
+                name: 'Test Group',
+                isPublic: true
+            },
+            newTestEvent = {
+                name: 'Test Event',
+                startDate: new Date(),
+                endDate: new Date()
+            }
+
+            let memberId, groupId;
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+                    newTestGroup.owner = memberId;
+
+                    return callService()
+                            .post('/group')
+                            .send(newTestGroup);
+                })
+                .then(result => {
+                    groupId = result.body._id;
+
+                    newTestEvent.memberId = memberId;
+                    newTestEvent.groupId = groupId;
+                    return callService()
+                            .post('/event')
+                            .send(newTestEvent);
+                })
+                .then(() => {
+                    return callService()
+                            .get(`/member/${memberId}/events`);
+                })
+                .then(result => {
+                    const { body: events } = result,
+                          [ event ] = events,
+                          { creator } = event;
+
+                    expect(mongoose.mongo.ObjectId(event.creator._id)).to.be.eql(memberId);
+                    expect(creator.name).to.not.be.undefined;
+                    expect(creator.email).to.not.be.undefined;
+                    expect(creator.joinDate).to.not.be.undefined;
+                    done();
+                });
+        });
+
+        it('should return name, email, and joinDate for all invitees', done => {
+            const newTestGroup = {
+                name: 'Test Group',
+                isPublic: true
+            },
+            newTestEvent = {
+                name: 'Test Event',
+                startDate: new Date(),
+                endDate: new Date()
+            },
+              newTestMember = {
+                name: 'Test Member',
+                email: 'Test@TestMmember.com'
+            };
+
+            let creatorId, memberId, groupId;
+
+            saveTestMember()
+                .then(member => {
+                    creatorId = member._id;
+                    newTestGroup.owner = creatorId;
+
+                    return callService()
+                            .post('/group')
+                            .send(newTestGroup);
+                })
+                .then(result => {
+                    groupId = result.body._id;
+
+                    return callService()
+                            .post('/member')
+                            .send(newTestMember);
+                })
+                .then(result => {
+                    memberId = result.body._id
+                    newTestEvent.memberId = creatorId;
+                    newTestEvent.groupId = groupId;
+                    newTestEvent.invitees = [ memberId ];
+                    return callService()
+                            .post('/event')
+                            .send(newTestEvent);
+                })
+                .then(() => {
+                    return callService()
+                            .get(`/member/${memberId}/events`);
+                })
+                .then(result => {
+                    const { body: events } = result,
+                          [ event ] = events,
+                          { invitees } = event,
+                          [ invitedMember ] = invitees;
+
+                    expect(invitedMember._id).to.be.eql(memberId);
+                    expect(invitedMember.name).to.not.be.undefined;
+                    expect(invitedMember.email).to.not.be.undefined;
+                    expect(invitedMember.joinDate).to.not.be.undefined;
+                    done();
+                })
+                .catch(err => console.log(err));
+        });
+
+        it('should return the name, and tags for the events group', done => {
+            const newTestGroup = {
+                name: 'Test Group',
+                isPublic: true
+            },
+            newTestEvent = {
+                name: 'Test Event',
+                startDate: new Date(),
+                endDate: new Date()
+            }
+
+            let memberId, groupId;
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+                    newTestGroup.owner = memberId;
+
+                    return callService()
+                            .post('/group')
+                            .send(newTestGroup);
+                })
+                .then(result => {
+                    groupId = result.body._id;
+
+                    newTestEvent.memberId = memberId;
+                    newTestEvent.groupId = groupId;
+                    return callService()
+                            .post('/event')
+                            .send(newTestEvent);
+                })
+                .then(() => {
+                    return callService()
+                            .get(`/member/${memberId}/events`);
+                })
+                .then(result => {
+                    const { body: events } = result,
+                          [ event ] = events,
+                          { group } = event;
+
+                    expect(group.name).to.not.be.undefined;
+                    expect(group.tags).to.not.be.undefined;
+                    done();
+                });
+        });
+    })
 });
