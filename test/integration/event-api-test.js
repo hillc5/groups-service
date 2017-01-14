@@ -1,18 +1,13 @@
 const mongoose = require('mongoose'),
       { Member, Group, Event } = require('../../service/models/Model'),
-      { saveTestMember, saveTestGroup, testGroupData } = require('../util/test-helpers')
+      { groupsService, saveTestMember, saveTestGroup, testGroupData } = require('../util/test-helpers')
 
       chai = require('chai'),
-      chaiHttp = require('chai-http'),
 
-      service = require('../../service/service')
+      service = require('../../service/service'),
       expect = chai.expect;
 
 chai.use(chaiHttp);
-
-function callService() {
-    return chai.request(service);
-}
 
 describe('event-api', () => {
     afterEach(done => {
@@ -32,7 +27,7 @@ describe('event-api', () => {
                   groupId: 'wrongId'
               };
 
-            callService()
+            groupsService()
                 .post('/event')
                 .send(newEvent)
                 .then(() => {
@@ -57,7 +52,7 @@ describe('event-api', () => {
                       memberId: 'wrongId'
                   };
 
-            callService()
+            groupsService()
                 .post('/event')
                 .send(newEvent)
                 .then(() => {
@@ -81,7 +76,7 @@ describe('event-api', () => {
                       memberId: testGroupData.owner
                   };
 
-            callService()
+            groupsService()
                 .post('/event')
                 .send(newEvent)
                 .then(() => {
@@ -105,7 +100,7 @@ describe('event-api', () => {
                       memberId: testGroupData.owner
                   };
 
-            callService()
+            groupsService()
                 .post('/event')
                 .send(newEvent)
                 .then(() => {
@@ -129,7 +124,7 @@ describe('event-api', () => {
                       memberId: testGroupData.owner
                   };
 
-            callService()
+            groupsService()
                 .post('/event')
                 .send(newEvent)
                 .then(() => {
@@ -154,26 +149,25 @@ describe('event-api', () => {
 
             let memberId, groupId;
 
-            saveTestMember()
-                .then(member => {
-                    memberId = member._id;
-                    newEvent.memberId = memberId;
-                    return saveTestGroup();
-                })
+            saveTestGroup()
                 .then(group => {
                     groupId = group._id;
+                    memberId = group.owner;
+
                     newEvent.groupId = groupId;
-                    return callService()
+                    newEvent.memberId = memberId;
+                    return groupsService()
                             .post('/event')
                             .send(newEvent);
                 })
                 .then(result => {
                     const { body: event } = result;
                     expect(result.status).to.be.eql(201);
-                    expect(mongoose.mongo.ObjectId(event.group)).to.be.eql(groupId);
-                    expect(mongoose.mongo.ObjectId(event.creator)).to.be.eql(memberId);
+                    expect(event.group).to.be.eql(groupId);
+                    expect(event.creator).to.be.eql(memberId);
                     done();
-                });
+                })
+                .catch(err => console.log(err));
         });
 
         it('should return the full event on success', done => {
@@ -185,16 +179,14 @@ describe('event-api', () => {
 
             let memberId, groupId;
 
-            saveTestMember()
-                .then(member => {
-                    memberId = member._id;
-                    newEvent.memberId = memberId;
-                    return saveTestGroup();
-                })
+            saveTestGroup()
                 .then(group => {
+                    memberId = group.owner
                     groupId = group._id;
+
+                    newEvent.memberId = memberId;
                     newEvent.groupId = groupId;
-                    return callService()
+                    return groupsService()
                             .post('/event')
                             .send(newEvent);
                 })
@@ -232,23 +224,20 @@ describe('event-api', () => {
 
             let memberOneId, memberTwoId;
 
-            saveTestMember()
-                .then(member => {
-                    memberOneId = member._id;
+            saveTestGroup()
+                .then(group => {
+                    memberOneId = group.owner;
                     newEvent.memberId = memberOneId;
-                    return callService()
+                    newEvent.groupId = group._id;
+                    return groupsService()
                             .post(`/member`)
                             .send(newMember);
                 })
                 .then(result => {
-                    memberTwoId = mongoose.mongo.ObjectId(result.body._id);
-                    return saveTestGroup();
-                })
-                .then(group => {
+                    memberTwoId = result.body._id;
                     newEvent.invitees.push(memberOneId);
                     newEvent.invitees.push(memberTwoId);
-                    newEvent.groupId = group._id;
-                    return callService()
+                    return groupsService()
                             .post('/event')
                             .send(newEvent);
                 })
@@ -256,8 +245,8 @@ describe('event-api', () => {
                     const { body: event } = result,
                           { invitees } = event;
 
-                    expect(mongoose.mongo.ObjectId(invitees[0])).to.be.eql(memberOneId);
-                    expect(mongoose.mongo.ObjectId(invitees[1])).to.be.eql(memberTwoId);
+                    expect(invitees[0]).to.be.eql(memberOneId);
+                    expect(invitees[1]).to.be.eql(memberTwoId);
                     done();
                 });
         });
@@ -271,16 +260,13 @@ describe('event-api', () => {
 
             let memberId, groupId, eventId;
 
-            saveTestMember()
-                .then(member => {
-                    memberId = member._id;
-                    newEvent.memberId = memberId;
-                    return saveTestGroup();
-                })
+            saveTestGroup()
                 .then(group => {
+                    memberId = group.owner;
+                    newEvent.memberId = memberId;
                     groupId = group._id;
                     newEvent.groupId = groupId;
-                    return callService()
+                    return groupsService()
                             .post('/event')
                             .send(newEvent);
                 })
@@ -303,16 +289,13 @@ describe('event-api', () => {
 
             let memberId, groupId, eventId;
 
-            saveTestMember()
-                .then(member => {
-                    memberId = member._id;
-                    newEvent.memberId = memberId;
-                    return saveTestGroup();
-                })
+            saveTestGroup()
                 .then(group => {
+                    memberId = group.owner;
+                    newEvent.memberId = memberId;
                     groupId = group._id;
                     newEvent.groupId = groupId;
-                    return callService()
+                    return groupsService()
                             .post('/event')
                             .send(newEvent);
                 })
@@ -340,23 +323,20 @@ describe('event-api', () => {
 
             let memberOneId, memberTwoId, eventId;
 
-            saveTestMember()
-                .then(member => {
-                    memberOneId = member._id;
+            saveTestGroup()
+                .then(group => {
+                    memberOneId = group.owner;
+                    newEvent.groupId = group._id;
                     newEvent.memberId = memberOneId;
-                    return callService()
+                    return groupsService()
                             .post(`/member`)
                             .send(newMember);
                 })
                 .then(result => {
-                    memberTwoId = mongoose.mongo.ObjectId(result.body._id);
-                    return saveTestGroup();
-                })
-                .then(group => {
+                    memberTwoId = result.body._id;
                     newEvent.invitees.push(memberOneId);
                     newEvent.invitees.push(memberTwoId);
-                    newEvent.groupId = group._id;
-                    return callService()
+                    return groupsService()
                             .post('/event')
                             .send(newEvent);
                 })
@@ -366,10 +346,10 @@ describe('event-api', () => {
 
                     eventId = event._id;
 
-                    expect(mongoose.mongo.ObjectId(invitees[0])).to.be.eql(memberOneId);
-                    expect(mongoose.mongo.ObjectId(invitees[1])).to.be.eql(memberTwoId);
+                    expect(invitees[0]).to.be.eql(memberOneId);
+                    expect(invitees[1]).to.be.eql(memberTwoId);
 
-                    return callService()
+                    return groupsService()
                             .get(`/member/${memberOneId}`);
                 })
                 .then(result => {
@@ -379,7 +359,7 @@ describe('event-api', () => {
 
                     expect(memberEventId).to.be.eql(eventId);
 
-                    return callService()
+                    return groupsService()
                             .get(`/member/${memberTwoId}`);
                 })
                 .then(result => {
@@ -396,7 +376,7 @@ describe('event-api', () => {
 
     describe('#findEventById', () => {
         it('should return 400 if malformed id is given', done => {
-            callService()
+            groupsService()
                 .get('/event/wrongId')
                 .then(() => {
                     // Fail test if we hit this block
@@ -429,20 +409,20 @@ describe('event-api', () => {
                     memberId = member._id;
                     newGroup.owner = memberId;
                     newEvent.memberId = memberId;
-                    return callService()
+                    return groupsService()
                             .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
                     groupId = result.body._id;
                     newEvent.groupId = groupId;
-                    return callService()
+                    return groupsService()
                             .post('/event')
                             .send(newEvent);
                 })
                 .then(result => {
                     const eventId = result.body._id;
-                    return callService()
+                    return groupsService()
                             .get(`/event/${eventId}`);
                 })
                 .then(result => {
@@ -469,20 +449,20 @@ describe('event-api', () => {
                     memberId = member._id;
                     newGroup.owner = memberId;
                     newEvent.memberId = memberId;
-                    return callService()
+                    return groupsService()
                             .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
                     groupId = result.body._id;
                     newEvent.groupId = groupId;
-                    return callService()
+                    return groupsService()
                             .post('/event')
                             .send(newEvent);
                 })
                 .then(result => {
                     const eventId = result.body._id;
-                    return callService()
+                    return groupsService()
                             .get(`/event/${eventId}`);
                 })
                 .then(result => {
@@ -512,20 +492,20 @@ describe('event-api', () => {
                     savedMember = member;
                     newGroup.owner = savedMember._id;
                     newEvent.memberId = savedMember._id;
-                    return callService()
+                    return groupsService()
                             .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
                     groupId = result.body._id;
                     newEvent.groupId = groupId;
-                    return callService()
+                    return groupsService()
                             .post('/event')
                             .send(newEvent);
                 })
                 .then(result => {
                     const eventId = result.body._id;
-                    return callService()
+                    return groupsService()
                             .get(`/event/${eventId}`);
                 })
                 .then(result => {
@@ -561,14 +541,14 @@ describe('event-api', () => {
                     savedMember = member;
                     newGroup.owner = savedMember._id;
                     newEvent.memberId = savedMember._id;
-                    return callService()
+                    return groupsService()
                             .post('/group')
                             .send(newGroup);
                 })
                 .then(result => {
                     groupId = result.body._id;
                     newEvent.groupId = groupId;
-                    return callService()
+                    return groupsService()
                             .post('/member')
                             .send(newMember);
                 })
@@ -576,13 +556,13 @@ describe('event-api', () => {
                     const invitee = result.body;
                     newEvent.invitees = [];
                     newEvent.invitees.push(invitee._id);
-                    return callService()
+                    return groupsService()
                             .post('/event')
                             .send(newEvent);
                 })
                 .then(result => {
                     const eventId = result.body._id;
-                    return callService()
+                    return groupsService()
                             .get(`/event/${eventId}`);
                 })
                 .then(result => {
@@ -596,271 +576,6 @@ describe('event-api', () => {
                     expect(invitee.email).to.be.eql(newMember.email);
                     expect(invitee._id).to.not.be.undefined;
                     expect(invitee.joinDate).to.not.be.undefined;
-                    done();
-                });
-        });
-    });
-
-    describe('#getAllGroupEvents', () => {
-        it('should return 400 if groupId is invalid', done => {
-            callService()
-                .get('/event/group/wrongId')
-                .then(() => {
-                    // Fail test if we hit this block
-                    expect(false).to.be.true;
-                })
-                .catch(err => {
-                    const error = JSON.parse(err.response.text);
-                    expect(err.status).to.be.eql(400);
-                    expect(error.groupId.param).to.not.be.undefined;
-                    expect(error.groupId.param).to.be.eql('groupId');
-                    done();
-                });
-        });
-
-        it('should return 200 on success', done => {
-            const newGroup = {
-                      name: 'Test Group',
-                      isPublic: true
-                  },
-                  newEvent = {
-                      name: 'Test Event',
-                      startDate: new Date(),
-                      endDate: new Date()
-                  };
-
-            let memberId, groupId;
-
-            saveTestMember()
-                .then(member => {
-                    memberId = member._id;
-                    newGroup.owner = memberId;
-                    newEvent.memberId = memberId;
-                    return callService()
-                            .post('/group')
-                            .send(newGroup);
-                })
-                .then(result => {
-                    groupId = result.body._id;
-                    newEvent.groupId = groupId;
-                    return callService()
-                            .post('/event')
-                            .send(newEvent);
-                })
-                .then(() => {
-                    return callService()
-                            .get(`/event/group/${groupId}`);
-                })
-                .then(result => {
-                    expect(result.status).to.be.eql(200);
-                    done();
-                });
-
-        });
-
-        it('should return an empty array if no events are found for the given group', done => {
-            const newGroup = {
-                      name: 'Test Group',
-                      isPublic: true
-                  };
-
-            let memberId, groupId;
-
-            saveTestMember()
-                .then(member => {
-                    memberId = member._id;
-                    newGroup.owner = memberId;
-                    return callService()
-                            .post('/group')
-                            .send(newGroup);
-                })
-                .then(result => {
-                    groupId = result.body._id;
-                    return callService()
-                            .get(`/event/group/${groupId}`);
-                })
-                .then(result => {
-                    expect(result.status).to.be.eql(200);
-                    expect(result.body).to.be.eql([]);
-                    done();
-                });
-        });
-
-        it('should return a single event if only one has been saved for a group', done => {
-            const newGroup = {
-                      name: 'Test Group',
-                      isPublic: true
-                  },
-                  newEvent = {
-                      name: 'Test Event',
-                      startDate: new Date(),
-                      endDate: new Date()
-                  };
-
-            let memberId, groupId;
-
-            saveTestMember()
-                .then(member => {
-                    memberId = member._id;
-                    newGroup.owner = memberId;
-                    newEvent.memberId = memberId;
-                    return callService()
-                            .post('/group')
-                            .send(newGroup);
-                })
-                .then(result => {
-                    groupId = result.body._id;
-                    newEvent.groupId = groupId;
-                    return callService()
-                            .post('/event')
-                            .send(newEvent);
-                })
-                .then(() => {
-                    return callService()
-                            .get(`/event/group/${groupId}`);
-                })
-                .then(result => {
-                    const { body: events } = result;
-                    expect(result.status).to.be.eql(200);
-                    expect(events.length).to.be.eql(1);
-                    done();
-                });
-        });
-
-        it('should return multiple events if they have been saved for a group', done => {
-            const newGroup = {
-                      name: 'Test Group',
-                      isPublic: true
-                  },
-                  newEventOne = {
-                      name: 'Test Event One',
-                      startDate: new Date(),
-                      endDate: new Date()
-                  },
-                  newEventTwo = {
-                      name: 'Test Event Two',
-                      startDate: new Date(),
-                      endDate: new Date()
-                  };
-
-            let memberId, groupId;
-
-            saveTestMember()
-                .then(member => {
-                    memberId = member._id;
-                    newGroup.owner = memberId;
-                    newEventOne.memberId = memberId;
-                    newEventTwo.memberId = memberId;
-                    return callService()
-                            .post('/group')
-                            .send(newGroup);
-                })
-                .then(result => {
-                    groupId = result.body._id;
-                    newEventOne.groupId = groupId;
-                    newEventTwo.groupId = groupId;
-                    return callService()
-                            .post('/event')
-                            .send(newEventOne);
-                })
-                .then(() => {
-                    return callService()
-                            .post('/event')
-                            .send(newEventTwo);
-                })
-                .then(() => {
-                    return callService()
-                            .get(`/event/group/${groupId}`);
-                })
-                .then(result => {
-                    const { body: events } = result;
-                    expect(result.status).to.be.eql(200);
-                    expect(events.length).to.be.eql(2);
-
-                    const [ savedEventOne, savedEventTwo ] = events;
-                    expect(savedEventOne.name).to.be.eql(newEventOne.name);
-                    expect(savedEventTwo.name).to.be.eql(newEventTwo.name);
-                    done();
-                });
-        });
-
-        it('should return all events for a group across multiple members', done => {
-            const newMemberOne = {
-                      name: 'Test Member One',
-                      email: 'TestOne@Test.com'
-                  },
-                  newMemberTwo = {
-                      name: 'Test Member Two',
-                      email: 'TestTwo@Test.com'
-                  },
-                  newGroup = {
-                      name: 'Test Group',
-                      isPublic: true
-                  },
-                  newEventOne = {
-                      name: 'Test Event One',
-                      startDate: new Date(),
-                      endDate: new Date()
-                  },
-                  newEventTwo = {
-                      name: 'Test Event Two',
-                      startDate: new Date(),
-                      endDate: new Date()
-                  };
-
-            let memberOne, memberTwo, groupId;
-
-            callService()
-                .post('/member')
-                .send(newMemberOne)
-                .then(result => {
-                    memberOne = result.body;
-                    newGroup.owner = memberOne._id;
-                    newEventOne.memberId = memberOne._id;
-                    return callService()
-                            .post('/group')
-                            .send(newGroup);
-                })
-                .then(result => {
-                    groupId = result.body._id;
-                    newEventOne.groupId = groupId;
-                    newEventTwo.groupId = groupId;
-                    return callService()
-                            .post('/event')
-                            .send(newEventOne);
-                })
-                .then(() => {
-                    return callService()
-                            .post('/member')
-                            .send(newMemberTwo);
-                })
-                .then(result => {
-                    memberTwo = result.body;
-                    newEventTwo.memberId = memberTwo._id;
-                    let member = {
-                        memberId: memberTwo._id
-                    };
-                    return callService()
-                            .post(`/group/${groupId}/member`)
-                            .send(member);
-                })
-                .then(() => {
-                    return callService()
-                            .post('/event')
-                            .send(newEventTwo);
-                })
-                .then(() => {
-                    return callService()
-                            .get(`/event/group/${groupId}`);
-                })
-                .then(result => {
-                    const { body: events } = result;
-                    expect(events.length).to.be.eql(2);
-                    const [ savedEventOne, savedEventTwo ] = events;
-                    expect(savedEventOne.name).to.be.eql(newEventOne.name);
-                    expect(savedEventOne.creator.name).to.be.eql(memberOne.name);
-                    expect(savedEventTwo.name).to.be.eql(newEventTwo.name);
-                    expect(savedEventTwo.creator.name).to.be.eql(memberTwo.name);
                     done();
                 });
         });

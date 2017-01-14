@@ -1,59 +1,67 @@
 const MODELS = require('../../service/models/Model'),
-      mongoose = require('mongoose');
+      mongoose = require('mongoose'),
+
+      chai = require('chai')
+      chaiHttp = require('chai-http')
+
+      service = require('../../service/models/Model');
+
+chai.use(chaiHttp);
 
 const testMemberData = {
           name: 'Test',
           email: getRandomEmailAddress(),
-          memberGroups: [],
-          memberPosts: [],
-          memberEvents: [],
-          joinDate: Date.now()
+          joinDate: new Date()
       };
 
 const testGroupData = {
           name: 'Test Group',
           description: 'Test Group Description',
           isPublic: true,
-          members: [],
-          events: [],
-          posts: [],
-          tags: [ 'test', 'testing' ],
-          creationDate: Date.now(),
-          lastUpdated: Date.now(),
-          owner: mongoose.mongo.ObjectId('5848772a7cc11952f4110e00')
+          tags: 'test, testing'
       };
 
-// TODO - Rewrite saveTest methods to use the actual service
-// probably will be passed in from the test modules.
+function groupsService() {
+    return chai.request(service);
+}
 
 function getRandomEmailAddress() {
     return `Test${Math.floor(Math.random() * 100)}@test.com`;
 }
 
 function saveTestMember() {
-    return saveTestItem('Member', testMemberData);
+    return groupsService()
+            .post('/member')
+            .send(testMemberData)
+            .then(result => {
+                return result.body;
+            });
 }
 
 function saveTestGroup() {
-    return saveTestItem('Group', testGroupData);
-}
+    const memberData = {
+        name: 'Test Guy',
+        email: getRandomEmailAddress()
+    };
 
-function saveTestItem(modelType, testData) {
-    const model = new MODELS[modelType](testData);
-    return model
-        .save()
-        .then(result => {
-            return new Promise(resolve => {
-                // Hack for tests.  Give mongo enough time to
-                // store the saved item.
-                setTimeout(() => resolve(result), 0);
+    return groupsService()
+            .post('/member')
+            .send(memberData)
+            .then(result => {
+                let groupData = Object.assign({ owner: result.body._id }, testGroupData);
+                return groupsService()
+                        .post('/group')
+                        .send(groupData);
+            })
+            .then(result => {
+                return result.body;
             });
-        });
 }
 
 module.exports = {
     saveTestMember,
     saveTestGroup,
+    groupsService,
     testMemberData,
     testGroupData
 };
