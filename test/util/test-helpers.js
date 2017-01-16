@@ -26,7 +26,7 @@ function groupsService() {
 }
 
 function getRandomEmailAddress() {
-    return `Test${Math.floor(Math.random() * 100)}@test.com`;
+    return `Test${Math.floor(Math.random() * 1e10)}@test.com`;
 }
 
 function saveTestMember() {

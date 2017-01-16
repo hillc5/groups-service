@@ -58,8 +58,33 @@ function findEvent(query, fields, refOptions) {
     return eventQuery.exec();
 }
 
+function addMemberToInvitees(eventId, memberId) {
+    const query = { _id: eventId },
+          update = { $addToSet: { invitees: memberId }},
+          options = { new: true };
+
+    let result;
+
+    return Event.findOneAndUpdate(query, update, options)
+            .exec()
+            .then(event => {
+                if (!event) {
+                    throw { status: 404, message: `No event found for id: ${eventId}` };
+                }
+
+                result = event;
+
+                const memberQuery = { _id: memberId },
+                      memberUpdate = { $addToSet: { memberEvents: eventId }};
+
+                Member.findOneAndUpdate(memberQuery, memberUpdate).exec();
+                return event;
+            });
+}
+
 module.exports = {
     saveEvent,
     findEvents,
-    findEvent
+    findEvent,
+    addMemberToInvitees
 };

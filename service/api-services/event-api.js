@@ -3,8 +3,7 @@ const eventData = require('../data-services/event-data'),
       validationType = 'event';
 
 function createEvent(req, res) {
-    const bodyOptions = [ 'name', 'startDate', 'endDate', 'groupId', 'memberId' ],
-          validationType = 'event';
+    const bodyOptions = [ 'name', 'startDate', 'endDate', 'groupId', 'memberId' ];
 
     validateRequest({ req, validationType, bodyOptions })
         .then(() => {
@@ -27,8 +26,7 @@ function createEvent(req, res) {
 }
 
 function getEventById(req, res) {
-    const paramOptions = [ 'eventId' ],
-          validationType = 'event';
+    const paramOptions = [ 'eventId' ];
 
     validateRequest({ req, paramOptions, validationType })
         .then(() => {
@@ -74,7 +72,30 @@ function getEventById(req, res) {
         .catch(sendError(res));
 }
 
+function inviteMember(req, res) {
+    const paramOptions = [ 'eventId' ],
+          bodyOptions = [ 'memberId' ];
+
+    validateRequest({ req, validationType, paramOptions, bodyOptions })
+        .then(() => {
+            const { eventId } = req.params,
+                  { memberId } = req.body;
+
+            return eventData.addMemberToInvitees(eventId, memberId);
+        })
+        .then(result => {
+            if (result) {
+                res.status(200).send(result);
+            } else {
+                throw { status: 500, message: 'There was an error' }
+            }
+        })
+        .catch(sendError(res));
+
+}
+
 module.exports = {
     createEvent,
-    getEventById
+    getEventById,
+    inviteMember
 };

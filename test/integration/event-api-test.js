@@ -580,4 +580,193 @@ describe('event-api', () => {
                 });
         });
     });
+
+    describe('#inviteMember', () => {
+        it('should return 400 if the eventId is invalid', done => {
+            const memberId = testGroupData.owner;
+            groupsService()
+                .post('/event/wrongId/invite')
+                .send({ memberId })
+                .then(result => {
+                    // Fail test if we hit this block
+                    expect(false).to.be.true;
+                })
+                .catch(err => {
+                    expect(err.status).to.be.eql(400);
+                    done();
+                })
+        });
+
+        it('should return 400 if the memberId is invalid', done => {
+            groupsService()
+                .post('/event/585d851c1b865511bb0543d2/invite')
+                .send({ memberId: 'wrongId' })
+                .then(result => {
+                    // Fail test if we hit this block
+                    expect(false).to.be.true;
+                })
+                .catch(err => {
+                    expect(err.status).to.be.eql(400);
+                    done();
+                })
+        });
+
+        it('should return 404 if the event is not found', done => {
+            groupsService()
+                .post('/event/585d851c1b865511bb0543d2/event')
+                .send({ memberId: '585d851c1b865511bb0543d2' })
+                .then(result => {
+                    // Fail test if we hit this block
+                    expect(false).to.be.true;
+                })
+                .catch(err => {
+                    expect(err.status).to.be.eql(404);
+                    done();
+                })
+        })
+
+        it('should return 200 on success', done => {
+            const newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            let memberToAddId, eventId;
+
+            saveTestGroup()
+                .then(group => {
+                    newEvent.groupId = group._id;
+                    newEvent.memberId = group.owner;
+                    return groupsService()
+                            .post('/event')
+                            .send(newEvent);
+                })
+                .then(result => {
+                    eventId = result.body._id;
+                    return saveTestMember()
+                })
+                .then(member => {
+                    memberToAddId = member._id;
+                    return groupsService()
+                            .post(`/event/${eventId}/invite`)
+                            .send({ memberId: memberToAddId });
+                })
+                .then(result => {
+                    expect(result.status).to.be.eql(200);
+                    done();
+                })
+        });
+
+        it('should return the event with the member added to the invitees array', done => {
+            const newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            let memberToAddId, eventId;
+
+            saveTestGroup()
+                .then(group => {
+                    newEvent.groupId = group._id;
+                    newEvent.memberId = group.owner;
+                    return groupsService()
+                            .post('/event')
+                            .send(newEvent);
+                })
+                .then(result => {
+                    eventId = result.body._id;
+                    return saveTestMember()
+                })
+                .then(member => {
+                    memberToAddId = member._id;
+                    return groupsService()
+                            .post(`/event/${eventId}/invite`)
+                            .send({ memberId: memberToAddId });
+                })
+                .then(result => {
+                    const { body: event } = result;
+                    expect(event.invitees).to.include(memberToAddId);
+                    done();
+                });
+        });
+
+        it('should add a member to an invitees array that has other members in it', done => {
+            const newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            let memberToAddId, eventId;
+
+            saveTestGroup()
+                .then(group => {
+                    newEvent.groupId = group._id;
+                    newEvent.memberId = group.owner;
+                    newEvent.invitees = [ group.owner ];
+                    return groupsService()
+                            .post('/event')
+                            .send(newEvent);
+                })
+                .then(result => {
+                    eventId = result.body._id;
+                    return saveTestMember()
+                })
+                .then(member => {
+                    memberToAddId = member._id;
+                    return groupsService()
+                            .post(`/event/${eventId}/invite`)
+                            .send({ memberId: memberToAddId });
+                })
+                .then(result => {
+                    const { body: event } = result;
+                    expect(event.invitees.length).to.be.eql(2);
+                    expect(event.invitees).to.include(newEvent.memberId);
+                    expect(event.invitees).to.include(memberToAddId);
+                    done();
+                });
+        });
+
+        it('should not add a duplicate memberId', done => {
+            const newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            let memberToAddId, eventId;
+
+            saveTestGroup()
+                .then(group => {
+                    newEvent.groupId = group._id;
+                    newEvent.memberId = group.owner;
+                    return groupsService()
+                            .post('/event')
+                            .send(newEvent);
+                })
+                .then(result => {
+                    eventId = result.body._id;
+                    return saveTestMember()
+                })
+                .then(member => {
+                    memberToAddId = member._id;
+                    return groupsService()
+                            .post(`/event/${eventId}/invite`)
+                            .send({ memberId: memberToAddId });
+                })
+                .then(result => {
+                    return groupsService()
+                            .post(`/event/${eventId}/invite`)
+                            .send({ memberId: memberToAddId });
+                })
+                .then(result => {
+                    const { body: event } = result;
+                    expect(event.invitees.length).to.be.eql(1);
+                    expect(event.invitees).to.include(memberToAddId);
+                    done();
+                })
+        })
+    })
 });
