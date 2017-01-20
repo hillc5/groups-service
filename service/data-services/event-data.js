@@ -10,7 +10,7 @@ function saveEvent(eventData) {
     let eventId,
         result;
 
-    logger.info(`${DATA_NAME} = now saving event, ${eventData.name}`);
+    logger.info(`${DATA_NAME} - now saving event, ${eventData.name}`);
     return event.save()
             .then(event => {
                 result = event;
@@ -79,6 +79,34 @@ function addMemberToInvitees(eventId, memberId) {
 
                 Member.findOneAndUpdate(memberQuery, memberUpdate).exec();
                 return event;
+            })
+            .catch(err => {
+                return err;
+            });
+}
+
+function moveMemberToAttendees(eventId, memberId) {
+    const query = { _id: eventId };
+
+    return Event.findOne(query)
+            .then(event => {
+                let index;
+
+                if (!event) {
+                    throw { status: 404, message: `No event found for id: ${eventId}` };
+                }
+
+                index = event.invitees.findIndex(invitee => invitee.equals(memberId));
+
+                if (index < 0) {
+                    throw { status: 404, message: `No member found for id: ${memberId}` };
+                }
+
+                event.invitees.splice(index, 1);
+                event.attendees.push(memberId);
+                event.save();
+
+                return event;
             });
 }
 
@@ -86,5 +114,6 @@ module.exports = {
     saveEvent,
     findEvents,
     findEvent,
-    addMemberToInvitees
+    addMemberToInvitees,
+    moveMemberToAttendees
 };

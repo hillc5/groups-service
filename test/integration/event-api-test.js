@@ -581,7 +581,7 @@ describe('event-api', () => {
         });
     });
 
-    describe('#inviteMember', () => {
+    describe('#memberInvite', () => {
         it('should return 400 if the eventId is invalid', done => {
             const memberId = testGroupData.owner;
             groupsService()
@@ -767,6 +767,233 @@ describe('event-api', () => {
                     expect(event.invitees).to.include(memberToAddId);
                     done();
                 })
+        });
+
+        it('should add the eventId to the memberEvents array', done => {
+            const newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            let memberToAddId, eventId;
+
+            saveTestGroup()
+                .then(group => {
+                    newEvent.groupId = group._id;
+                    newEvent.memberId = group.owner;
+                    return groupsService()
+                            .post('/event')
+                            .send(newEvent);
+                })
+                .then(result => {
+                    eventId = result.body._id;
+                    return saveTestMember()
+                })
+                .then(member => {
+                    memberToAddId = member._id;
+                    return groupsService()
+                            .post(`/event/${eventId}/invite`)
+                            .send({ memberId: memberToAddId });
+                })
+                .then(() => {
+                    return groupsService()
+                            .get(`/member/${memberToAddId}`);
+                })
+                .then(result => {
+                    const { body: member } = result;
+                    expect(member.memberEvents[0]._id).to.be.eql(eventId);
+                    done();
+                });
+        })
+    });
+
+    describe('#memberAttend', () => {
+        it('should return 400 if an invalid eventId is given', done => {
+
+            saveTestMember()
+                .then(member => {
+                    return groupsService()
+                            .post('/event/wrongId/attend')
+                            .send({ memberId: member._id });
+                })
+                .then(result => {
+                    // Fail test if we hit this block
+                    expect(false).to.be.true;
+                })
+                .catch(err => {
+                    const { text } = err.response;
+                    expect(err.status).to.be.eql(400);
+                    expect(JSON.parse(text).eventId).to.not.be.undefined;
+                    done();
+                });
+
+        });
+
+        it('should return 400 if an invalid memberId is given', done => {
+            const newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            saveTestGroup()
+                .then(group => {
+                    newEvent.memberId = group.owner;
+                    newEvent.groupId = group._id;
+                    return groupsService()
+                            .post('/event')
+                            .send(newEvent)
+                })
+                .then(result => {
+                    const { body: event } = result;
+                    return groupsService()
+                            .post(`/event/${event._id}/attend`)
+                            .send({ memberId: 'wrongId' });
+                })
+                .then(result => {
+                    // Fail test if we hit this block
+                    expect(false).to.be.true;
+                })
+                .catch(err => {
+                    const { text } = err.response;
+                    expect(err.status).to.be.eql(400);
+                    expect(JSON.parse(text).memberId).to.not.be.undefined;
+                    done();
+                });
+        });
+
+        it('should return 404 if there is no event for the given eventId', done => {
+
+            let groupId;
+
+            saveTestGroup()
+                .then(group => {
+                    groupId = group._id;
+                    return groupsService()
+                            .post(`/event/${groupId}/attend`)
+                            .send({ memberId: group.owner });
+                })
+                .then(result => {
+                    // Fail test if we hit this block
+                    expect(false).to.be.true;
+                })
+                .catch(err => {
+                    const { text } = err.response;
+                    expect(err.status).to.be.eql(404);
+                    expect(JSON.parse(text).message).to.be.eql(`No event found for id: ${groupId}`);
+                    done();
+                });
+        });
+
+        it('should return 404 if there is no member in the invitees array for the given memberId', done => {
+            const newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            let memberToInviteId, eventId;
+
+            saveTestMember()
+                .then(member => {
+                    memberToInviteId = member._id;
+                    return saveTestGroup();
+                })
+                .then(group => {
+                    newEvent.groupId = group._id;
+                    newEvent.memberId = group.owner;
+                    newEvent.invitees = [ group.owner ];
+                    return groupsService()
+                            .post('/event')
+                            .send(newEvent);
+                })
+                .then(result => {
+                    eventId = result.body._id;
+                    return groupsService()
+                            .post(`/event/${eventId}/attend`)
+                            .send({ memberId: memberToInviteId });
+                })
+                .then(result => {
+                    // Fail test if we hit this block
+                    expect(false).to.be.true;
+                })
+                .catch(err => {
+                    const { text } = err.response;
+                    expect(err.status).to.be.eql(404);
+                    expect(JSON.parse(text).message).to.be.eql(`No member found for id: ${memberToInviteId}`);
+                    done();
+                });
+        });
+
+        it('should return 200 on success', done => {
+            const newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            let memberToInviteId, eventId;
+
+            saveTestMember()
+                .then(member => {
+                    memberToInviteId = member._id;
+                    return saveTestGroup();
+                })
+                .then(group => {
+                    newEvent.groupId = group._id;
+                    newEvent.memberId = group.owner;
+                    newEvent.invitees = [ group.owner, memberToInviteId ];
+                    return groupsService()
+                            .post('/event')
+                            .send(newEvent);
+                })
+                .then(result => {
+                    eventId = result.body._id;
+                    return groupsService()
+                            .post(`/event/${eventId}/attend`)
+                            .send({ memberId: memberToInviteId });
+                })
+                .then(result => {
+                    expect(result.status).to.be.eql(200);
+                    done();
+                });
+        });
+
+        it('should return the updated event on success', done => {
+            const newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            let memberToAttendId, eventId;
+
+            saveTestMember()
+                .then(member => {
+                    memberToAttendId = member._id;
+                    return saveTestGroup();
+                })
+                .then(group => {
+                    newEvent.groupId = group._id;
+                    newEvent.memberId = group.owner;
+                    newEvent.invitees = [ group.owner, memberToAttendId ];
+                    return groupsService()
+                            .post('/event')
+                            .send(newEvent);
+                })
+                .then(result => {
+                    eventId = result.body._id;
+                    return groupsService()
+                            .post(`/event/${eventId}/attend`)
+                            .send({ memberId: memberToAttendId });
+                })
+                .then(result => {
+                    const { body: event } = result;
+                    expect(event.attendees).to.include(memberToAttendId);
+                    expect(event.invitees).to.not.include(memberToAttendId);
+                    done();
+                });
         })
     })
 });

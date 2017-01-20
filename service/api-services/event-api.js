@@ -72,7 +72,7 @@ function getEventById(req, res) {
         .catch(sendError(res));
 }
 
-function inviteMember(req, res) {
+function memberInvite(req, res) {
     const paramOptions = [ 'eventId' ],
           bodyOptions = [ 'memberId' ];
 
@@ -94,8 +94,30 @@ function inviteMember(req, res) {
 
 }
 
+function memberAttend(req, res) {
+    const paramOptions = [ 'eventId' ],
+          bodyOptions = [ 'memberId' ];
+
+    validateRequest({ req, validationType, paramOptions, bodyOptions })
+        .then(() => {
+            const { eventId } = req.params,
+                  { memberId } = req.body;
+
+            return eventData.moveMemberToAttendees(eventId, memberId);
+        })
+        .then(result => {
+            if (result) {
+                res.status(200).send(result);
+            } else {
+                throw { status: 500, message: 'There was an error' };
+            }
+        })
+        .catch(sendError(res));
+}
+
 module.exports = {
     createEvent,
     getEventById,
-    inviteMember
+    memberInvite,
+    memberAttend
 };
