@@ -994,6 +994,6 @@ describe('event-api', () => {
                     expect(event.invitees).to.not.include(memberToAttendId);
                     done();
                 });
-        })
-    })
+        });
+    });
 });
