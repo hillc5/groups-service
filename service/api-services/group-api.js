@@ -8,13 +8,13 @@ function createGroup(req, res) {
 
     validateRequest({ req, validationType, bodyOptions })
         .then(() => {
-            const { owner, name, description='', tags, isPublic } = req.body,
+            const { owner, name, description='', tags='', isPublic } = req.body,
 
                   newGroup = {
                      name,
                      description,
                      members: [ owner ],
-                     tags: tags && tags.split(',').map(tag => tag.trim()) || [],
+                     tags: tags.split(',').filter(item => item).map(tag => tag.trim()),
                      owner,
                      isPublic,
                      creationDate: Date.now()
