@@ -3,44 +3,14 @@ const { Event, Member, Group } = require('../models/Model'),
 
       DATA_NAME = 'MEMBER_DATA';
 
-
 function saveEvent(eventData) {
     const event = new Event(eventData);
 
-    let eventId,
-        result;
-
     logger.info(`${DATA_NAME} - now saving event, ${eventData.name}`);
-    return event.save()
-            .then(event => {
-                result = event;
-                eventId = result._id;
-                return Member.findOne({ _id: result.creator });
-            })
-            .then(member => {
-                member.memberEvents.push({ _id: eventId });
-                member.save();
-                return Group.findOne({ _id: result.group });
-            })
-            .then(group => {
-                group.events.push({ _id: eventId });
-                group.save();
-                return Member.find({ _id: { $in: result.invitees }});
-            })
-            .then(members => {
-                if (members) {
-                    members.forEach(member => {
-                        if (!member._id.equals(result.creator)) {
-                            member.memberEvents.push({ _id: eventId });
-                            member.save();
-                        }
-                    });
-                }
-                return result;
-            });
+    return event.save();
 }
 
-function findEvents(query, fields, refOptions) {
+function findEvents(query={}, fields='', refOptions=[]) {
     let eventQuery = Event.find(query)
                             .select(fields)
                             .populate(refOptions);
@@ -49,7 +19,7 @@ function findEvents(query, fields, refOptions) {
     return eventQuery.exec();
 }
 
-function findEvent(query, fields, refOptions) {
+function findEvent(query={}, fields='', refOptions=[]) {
     let eventQuery = Event.findOne(query)
                             .select(fields)
                             .populate(refOptions);
@@ -71,17 +41,7 @@ function addMemberToInvitees(eventId, memberId) {
                 if (!event) {
                     throw { status: 404, message: `No event found for id: ${eventId}` };
                 }
-
-                result = event;
-
-                const memberQuery = { _id: memberId },
-                      memberUpdate = { $addToSet: { memberEvents: eventId }};
-
-                Member.findOneAndUpdate(memberQuery, memberUpdate).exec();
                 return event;
-            })
-            .catch(err => {
-                return err;
             });
 }
 

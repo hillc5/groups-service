@@ -166,8 +166,7 @@ describe('event-api', () => {
                     expect(event.group).to.be.eql(groupId);
                     expect(event.creator).to.be.eql(memberId);
                     done();
-                })
-                .catch(err => console.log(err));
+                });
         });
 
         it('should return the full event on success', done => {
@@ -200,15 +199,43 @@ describe('event-api', () => {
                     expect(new Date(event.endDate)).to.be.an.instanceOf(Date);
                     expect(mongoose.mongo.ObjectId(event.creator)).to.be.an.instanceOf(mongoose.mongo.ObjectId);
                     expect(mongoose.mongo.ObjectId(event.group)).to.be.an.instanceOf(mongoose.mongo.ObjectId);
-                    expect(event.posts).to.be.an('array');
-                    expect(event.posts.length).to.be.eql(0);
                     expect(event.invitees).to.be.an('array');
-                    expect(event.invitees.length).to.be.eql(0);
+                    expect(event.invitees.length).to.be.eql(1);
                     expect(event.attendees).to.be.an('array');
                     expect(event.attendees.length).to.be.eql(0);
                     done();
                 });
         });
+
+        it('should add the creator to the invitees array on creation', done => {
+                  const newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            let memberId, groupId;
+
+            saveTestGroup()
+                .then(group => {
+                    groupId = group._id;
+                    memberId = group.owner;
+
+                    newEvent.groupId = groupId;
+                    newEvent.memberId = memberId;
+                    return groupsService()
+                            .post('/event')
+                            .send(newEvent);
+                })
+                .then(result => {
+                    const { body: event } = result;
+                    expect(result.status).to.be.eql(201);
+                    expect(event.group).to.be.eql(groupId);
+                    expect(event.creator).to.be.eql(memberId);
+                    expect(event.invitees).to.include(memberId);
+                    done();
+                });
+        })
 
         it('should allow invitees to be added on creation', done => {
             const newEvent = {
@@ -250,128 +277,6 @@ describe('event-api', () => {
                     done();
                 });
         });
-
-        it('should store eventId in the creating members memberEvents array', done => {
-            const newEvent = {
-                      name: 'Test Event',
-                      startDate: new Date(),
-                      endDate: new Date()
-                  };
-
-            let memberId, groupId, eventId;
-
-            saveTestGroup()
-                .then(group => {
-                    memberId = group.owner;
-                    newEvent.memberId = memberId;
-                    groupId = group._id;
-                    newEvent.groupId = groupId;
-                    return groupsService()
-                            .post('/event')
-                            .send(newEvent);
-                })
-                .then(result => {
-                    eventId = result.body._id;
-                    return Member.findOne({ _id: memberId });
-                })
-                .then(member => {
-                    expect(member.memberEvents).to.include(eventId);
-                    done();
-                });
-        });
-
-        it('should store eventId in the owning groups events array', done => {
-            const newEvent = {
-                      name: 'Test Event',
-                      startDate: new Date(),
-                      endDate: new Date()
-                  };
-
-            let memberId, groupId, eventId;
-
-            saveTestGroup()
-                .then(group => {
-                    memberId = group.owner;
-                    newEvent.memberId = memberId;
-                    groupId = group._id;
-                    newEvent.groupId = groupId;
-                    return groupsService()
-                            .post('/event')
-                            .send(newEvent);
-                })
-                .then(result => {
-                    eventId = result.body._id;
-                    return Group.findOne({ _id: groupId });
-                })
-                .then(group => {
-                    expect(group.events).to.include(eventId);
-                    done();
-                });
-        });
-
-        it('should store eventId in memberEvents array for all invitees', done => {
-            const newEvent = {
-                      name: 'Test Event',
-                      startDate: new Date(),
-                      endDate: new Date(),
-                      invitees: []
-                  },
-                  newMember = {
-                      name: 'Test',
-                      email: 'Bill@Bob.com'
-                  };
-
-            let memberOneId, memberTwoId, eventId;
-
-            saveTestGroup()
-                .then(group => {
-                    memberOneId = group.owner;
-                    newEvent.groupId = group._id;
-                    newEvent.memberId = memberOneId;
-                    return groupsService()
-                            .post(`/member`)
-                            .send(newMember);
-                })
-                .then(result => {
-                    memberTwoId = result.body._id;
-                    newEvent.invitees.push(memberOneId);
-                    newEvent.invitees.push(memberTwoId);
-                    return groupsService()
-                            .post('/event')
-                            .send(newEvent);
-                })
-                .then(result => {
-                    const { body: event } = result,
-                          { invitees } = event;
-
-                    eventId = event._id;
-
-                    expect(invitees[0]).to.be.eql(memberOneId);
-                    expect(invitees[1]).to.be.eql(memberTwoId);
-
-                    return groupsService()
-                            .get(`/member/${memberOneId}`);
-                })
-                .then(result => {
-                    const { memberEvents } = result.body,
-                          [ event ] = memberEvents,
-                          { _id: memberEventId } = event;
-
-                    expect(memberEventId).to.be.eql(eventId);
-
-                    return groupsService()
-                            .get(`/member/${memberTwoId}`);
-                })
-                .then(result => {
-                    const { memberEvents } = result.body,
-                          [ event ] = memberEvents,
-                          { _id: memberEventId } = event;
-
-                    expect(memberEventId).to.be.eql(eventId);
-                    done();
-                });
-        });
-
     });
 
     describe('#findEventById', () => {
@@ -722,7 +627,8 @@ describe('event-api', () => {
                 })
                 .then(result => {
                     const { body: event } = result;
-                    expect(event.invitees.length).to.be.eql(2);
+                    // length === 3 because the creator is added to the invitees array
+                    expect(event.invitees.length).to.be.eql(3);
                     expect(event.invitees).to.include(newEvent.memberId);
                     expect(event.invitees).to.include(memberToAddId);
                     done();
@@ -763,49 +669,12 @@ describe('event-api', () => {
                 })
                 .then(result => {
                     const { body: event } = result;
-                    expect(event.invitees.length).to.be.eql(1);
+                    // 2 because creator is added to the invitees array
+                    expect(event.invitees.length).to.be.eql(2);
                     expect(event.invitees).to.include(memberToAddId);
                     done();
                 })
         });
-
-        it('should add the eventId to the memberEvents array', done => {
-            const newEvent = {
-                      name: 'Test Event',
-                      startDate: new Date(),
-                      endDate: new Date()
-                  };
-
-            let memberToAddId, eventId;
-
-            saveTestGroup()
-                .then(group => {
-                    newEvent.groupId = group._id;
-                    newEvent.memberId = group.owner;
-                    return groupsService()
-                            .post('/event')
-                            .send(newEvent);
-                })
-                .then(result => {
-                    eventId = result.body._id;
-                    return saveTestMember()
-                })
-                .then(member => {
-                    memberToAddId = member._id;
-                    return groupsService()
-                            .post(`/event/${eventId}/invite`)
-                            .send({ memberId: memberToAddId });
-                })
-                .then(() => {
-                    return groupsService()
-                            .get(`/member/${memberToAddId}`);
-                })
-                .then(result => {
-                    const { body: member } = result;
-                    expect(member.memberEvents[0]._id).to.be.eql(eventId);
-                    done();
-                });
-        })
     });
 
     describe('#memberAttend', () => {

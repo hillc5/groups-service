@@ -144,7 +144,7 @@ describe('group-api', () => {
                         .send(newGroup);
                 })
                 .then(res => {
-                    const { _id, __v, owner, name, isPublic, description, members, events, posts, tags, creationDate } = res.body;
+                    const { _id, __v, owner, name, isPublic, description, members, tags, creationDate } = res.body;
                     expect(res.status).to.be.eql(201);
                     expect(_id).to.not.be.undefined;
                     expect(__v).to.be.eql(0);
@@ -153,47 +153,11 @@ describe('group-api', () => {
                     expect(description).to.be.a('string');
                     expect(members).to.be.an('array');
                     expect(members.length).to.be.eql(1);
-                    expect(posts).to.be.an('array');
-                    expect(posts.length).to.be.eql(0);
-                    expect(events).to.be.an('array');
-                    expect(events.length).to.be.eql(0);
                     expect(tags).to.be.an('array');
                     expect(tags.length).to.be.eql(0);
                     expect(creationDate).to.be.a('string');
                     done();
                 });
-        });
-
-        it('should add the group id to the owner memberGroups array', done => {
-            const newGroup = {
-                name: 'Test',
-                isPublic: true
-            };
-
-            let groupId,
-                ownerId;
-
-            saveTestMember()
-                .then(member => {
-                    newGroup.owner = member._id;
-                    return groupsService()
-                            .post('/group')
-                            .send(newGroup);
-                })
-                .then(result => {
-                    groupId = result.body._id;
-                    return groupsService()
-                            .get(`/member/${newGroup.owner}`);
-                })
-                .then(result => {
-                    const { body: member } = result,
-                          memberGroupId = member.memberGroups[0]._id,
-                          foundMemberId = member._id;
-
-                    expect(foundMemberId).to.be.eql(newGroup.owner);
-                    expect(memberGroupId).to.be.eql(groupId);
-                    done();
-                })
         });
 
         it('should create an empty array for tags when no tags are supplied', done => {
@@ -244,7 +208,7 @@ describe('group-api', () => {
     });
 
     describe('#addMemberToGroup', () => {
-        it('should return 400 for incorrect groupId', done => {
+        it('should return 400 for incorrect format for groupId', done => {
             groupsService()
                 .post(`/group/wrongId/member`)
                 .then(result => {
@@ -258,7 +222,7 @@ describe('group-api', () => {
                 });
         });
 
-        it('should return 400 for incorrect memberId', done => {
+        it('should return 400 for incorrect format for memberId', done => {
             groupsService()
                 .post(`/group/5848ed108b3ccb3ffcc691d/member`)
                 .send({ memberId: 'wrongId' })
@@ -309,30 +273,6 @@ describe('group-api', () => {
                     const { members } = result.body;
                     expect(members.length).to.be.eql(2);
                     expect(members[1]).to.be.eql(memberId);
-                    done();
-                });
-        });
-
-        it('should add the groupId to the members memberGroups array', done => {
-            let groupId,
-                memberId;
-
-            saveTestMember()
-                .then(member => {
-                    memberId = member._id;
-                    return saveTestGroup();
-                })
-                .then(group => {
-                    groupId = group._id;
-                    return groupsService()
-                        .post(`/group/${groupId}/member`)
-                        .send({ memberId });
-                })
-                .then(() => {
-                    return Member.findOne({ _id: memberId }).exec();
-                })
-                .then(member => {
-                    expect(member.memberGroups[0]).to.be.eql(mongoose.mongo.ObjectId(groupId));
                     done();
                 });
         });

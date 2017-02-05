@@ -16,7 +16,8 @@ function createEvent(req, res) {
                       endDate: new Date(endDate),
                       invitees: invitees.map(invitee => invitee.trim())
                   };
-
+            // Add creator to invitees list
+            newEvent.invitees.push(newEvent.creator);
             return eventData.saveEvent(newEvent);
         })
         .then(result => {

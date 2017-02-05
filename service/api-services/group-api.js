@@ -1,4 +1,5 @@
 const groupData = require('../data-services/group-data'),
+      eventData = require('../data-services/event-data'),
       mongoose = require('mongoose'),
       { validateRequest, sendError } = require('../util/validation'),
       validationType = 'group';
@@ -11,13 +12,13 @@ function createGroup(req, res) {
             const { owner, name, description='', tags='', isPublic } = req.body,
 
                   newGroup = {
-                     name,
-                     description,
-                     members: [ owner ],
-                     tags: tags.split(',').filter(item => item).map(tag => tag.trim()),
-                     owner,
-                     isPublic,
-                     creationDate: Date.now()
+                      name,
+                      description,
+                      owner,
+                      isPublic,
+                      members: [ owner ],
+                      tags: tags.split(',').filter(item => item).map(tag => tag.trim()),
+                      creationDate: Date.now()
                   };
 
             return groupData.saveGroup(newGroup)
@@ -101,42 +102,38 @@ function getAllGroupEvents (req, res) {
     validateRequest({ req, paramOptions, validationType })
         .then(() => {
             const { groupId } = req.params,
-                  query = { _id: groupId },
-                  fields = 'events',
-                  groupEventsOptions = {
-                      path: 'events',
-                      select: '-__v',
-                      populate: [
-                          {
-                              path: 'creator',
-                              select: 'name email joinDate'
-                          },
-                          {
-                              path:  'invitees',
-                              select: 'name email joinDate'
-                          },
-                          {
-                              path: 'attendees',
-                              select: 'name email joinDate'
-                          },
-                          {
-                              path: 'posts',
-                              select: 'title text owner postDate replies'
-                          }
-                      ]
+                  query = { group: groupId },
+                  fields = '-__v',
+                  groupOptions = {
+                     path: 'group',
+                     select: 'name _id tags'
                   },
-                  refOptions = [ groupEventsOptions ];
+                  creatorOptions = {
+                     path: 'creator',
+                     select: 'name email joinDate'
+                  },
+                  inviteesOptions = {
+                     path: 'invitees',
+                     select: 'name email joinDate'
+                  },
+                  attendeesOptions = {
+                     path: 'attendees',
+                     select: 'name email joinDate'
+                  },
+                  postOptions = {
+                     path: 'posts',
+                     select: 'title text owner replies postDate',
+                     populate: {
+                        path: 'replies',
+                        select: 'title text owner replies postDate'
+                     }
+                  },
+                  refOptions = [ groupOptions, creatorOptions, inviteesOptions, attendeesOptions, postOptions ];
 
-            return groupData.findGroup(query, fields, refOptions);
+            return eventData.findEvents(query, fields, refOptions);
         })
-        .then(result => {
-            if (result) {
-                const { events=[] } = result;
-                res.status(200).send(events);
-            } else {
-                throw { status: 404, message: `No groups found for group id: ${req.params.groupId}` };
-            }
-
+        .then((result=[]) => {
+            res.status(200).send(result);
         })
         .catch(sendError(res));
 }

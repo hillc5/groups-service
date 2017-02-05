@@ -11,7 +11,7 @@ function saveMember(memberData) {
     return member.save();
 }
 
-function findMember(query, fields, refOptions) {
+function findMember(query={}, fields='', refOptions=[]) {
     let memberQuery = Member.findOne(query)
                         .select(fields)
                         .populate(refOptions);
@@ -21,7 +21,7 @@ function findMember(query, fields, refOptions) {
     return memberQuery.exec();
 }
 
-function findMembers(query, fields, refOptions) {
+function findMembers(query={}, fields='', refOptions=[]) {
     let memberQuery = Member.find(query)
                             .select(fields)
                             .populate(refOptions);
