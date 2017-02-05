@@ -6,7 +6,7 @@ const MemberSchema = Schema({
     name: { type: String, required: true },
     email: { type: String, unique: true, required: true },
     //memberGroups: [ { type: ObjectId, ref: 'Group' } ],
-    memberPosts: [ { type:  ObjectId, ref: 'Post' } ],
+    //memberPosts: [ { type:  ObjectId, ref: 'Post' } ],
     memberEvents: [ { type: ObjectId, ref: 'Event' } ],
     joinDate: Date
 });
