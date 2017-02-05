@@ -86,18 +86,17 @@ describe('member-api', () => {
                 .post('/member')
                 .send(newMember)
                 .then(res => {
-                    const { _id, __v, name, email, memberGroups, memberPosts, memberEvents, joinDate } = res.body;
+                    const { _id, __v, name, email, joinDate } = res.body;
                     expect(res.status).to.be.eql(201);
                     expect(_id).to.not.be.undefined;
                     // initial create version === 0
                     expect(__v).to.be.eql(0);
                     expect(name).to.be.eql(newMember.name);
                     expect(email).to.be.eql(newMember.email);
-                    expect(memberEvents).to.be.an('array');
                     expect(joinDate).to.be.a('string');
                     expect(new Date(joinDate)).to.be.an.instanceOf(Date);
                     // make sure test fails if Member schema is updated
-                    expect(Object.keys(res.body).length).to.be.eql(6);
+                    expect(Object.keys(res.body).length).to.be.eql(5);
                     done();
             });
         });
@@ -160,13 +159,11 @@ describe('member-api', () => {
                     return groupsService().get(`/member/${memberId}`)
                 })
                 .then(res => {
-                    const { _id, name, email, memberGroups, memberPosts, memberEvents, joinDate } = res.body
+                    const { _id, name, email, joinDate } = res.body
                     expect(res.status).to.be.eql(200);
                     expect(_id).to.be.eql(memberId);
                     expect(name).to.be.eql(testMemberData.name);
                     expect(email).to.be.eql(testMemberData.email);;
-                    expect(memberEvents).to.be.an('array');
-                    expect(memberEvents.length).to.be.eql(0);
                     expect(joinDate).to.not.be.undefined;
                     done();
                 });

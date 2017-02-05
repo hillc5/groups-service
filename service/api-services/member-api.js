@@ -1,5 +1,6 @@
 const memberData = require('../data-services/member-data'),
       groupData = require('../data-services/group-data'),
+      eventData = require('../data-services/event-data'),
       { sendError, validateRequest } = require('../util/validation'),
       validationType = 'member';
 
@@ -13,9 +14,6 @@ function createMember(req, res) {
             newMember = {
                 name,
                 email,
-                memberGroups: [],
-                memberPosts: [],
-                memberEvents: [],
                 joinDate: Date.now()
             };
 
@@ -74,44 +72,46 @@ function getAllMemberEvents(req, res) {
     validateRequest({ req, paramOptions, validationType })
         .then(() => {
             const { memberId } = req.params,
-                  query = { _id: memberId },
-                  fields = 'memberEvents -_id',
-                  memberEventsOptions = {
-                      path: 'memberEvents',
-                      select: '-__v',
-                      populate: [
-                          {
-                              path: 'creator',
-                              select: 'name email joinDate'
-                          },
-                          {
-                              path:  'invitees',
-                              select: 'name email joinDate'
-                          },
-                          {
-                              path: 'attendees',
-                              select: 'name email joinDate'
-                          },
-                          {
-                              path: 'posts',
-                              select: 'title text owner postDate replies'
-                          },
-                          {
-                              path: 'group',
-                              select: 'name tags'
-                          }
-                      ]
+                  query = {
+                      $or:
+                          [
+                              { creator: memberId },
+                              { invitees: memberId },
+                              { attendees: memberId }
+                          ]
                   },
-                  refOptions = [ memberEventsOptions ];
+                  fields = '-__v',
+                  groupOptions = {
+                     path: 'group',
+                     select: 'name _id tags'
+                  },
+                  creatorOptions = {
+                     path: 'creator',
+                     select: 'name email joinDate'
+                  },
+                  inviteesOptions = {
+                     path: 'invitees',
+                     select: 'name email joinDate'
+                  },
+                  attendeesOptions = {
+                     path: 'attendees',
+                     select: 'name email joinDate'
+                  },
+                  postOptions = {
+                     path: 'posts',
+                     select: 'title text owner replies postDate',
+                     populate: {
+                        path: 'replies',
+                        select: 'title text owner replies postDate'
+                     }
+                  },
+                  refOptions = [ groupOptions, creatorOptions, inviteesOptions, attendeesOptions, postOptions ];
 
-            return memberData.findMember(query, fields, refOptions);
+            return eventData.findEvents(query, fields, refOptions);
         })
-        .then(result => {
+        .then((result=[]) => {
             if (result) {
-                const { memberEvents=[] } = result;
-                res.status(200).send(memberEvents);
-            } else {
-                throw { status: 404, message: `No groups found for member: ${req.params.memberId}` };
+                res.status(200).send(result);
             }
 
         })
@@ -127,42 +127,9 @@ function findMemberById(req, res) {
             const { memberId } = req.params,
                   query = { _id: memberId },
                   // remove __v mongoose property
-                  fields = '-__v',
-                  groupOptions = {
-                      path: 'memberGroups',
-                      select: '-__v',
-                      populate: [
-                          {
-                              path: 'owner',
-                              select: 'name'
-                          },
-                          {
-                              path: 'members',
-                              select: 'name'
-                          },
-                          {
-                              path: 'posts',
-                              select: 'title text postDate',
-                              options: { sort: { postDate: -1 }, limit: 10 }
-                          },
-                          {
-                              path: 'events',
-                              select: 'name invitees attendees startDate endDate',
-                              options: { sort: { startDate: -1 }, limit: 10 }
-                          }
-                      ]
-                  },
-                  postOptions = {
-                      path: 'memberPosts',
-                      select: '-__v'
-                  },
-                  eventOptions = {
-                      path: 'memberEvents',
-                      select: '-__v'
-                  },
-                  refOptions = [ groupOptions, postOptions, eventOptions ];
+                  fields = '-__v';
 
-            return memberData.findMember(query, fields, refOptions)
+            return memberData.findMember(query, fields)
         })
         .then(result => {
             if (result) {

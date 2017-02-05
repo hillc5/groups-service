@@ -144,7 +144,7 @@ describe('group-api', () => {
                         .send(newGroup);
                 })
                 .then(res => {
-                    const { _id, __v, owner, name, isPublic, description, members, events, posts, tags, creationDate } = res.body;
+                    const { _id, __v, owner, name, isPublic, description, members, posts, tags, creationDate } = res.body;
                     expect(res.status).to.be.eql(201);
                     expect(_id).to.not.be.undefined;
                     expect(__v).to.be.eql(0);
@@ -153,10 +153,6 @@ describe('group-api', () => {
                     expect(description).to.be.a('string');
                     expect(members).to.be.an('array');
                     expect(members.length).to.be.eql(1);
-                    expect(posts).to.be.an('array');
-                    expect(posts.length).to.be.eql(0);
-                    expect(events).to.be.an('array');
-                    expect(events.length).to.be.eql(0);
                     expect(tags).to.be.an('array');
                     expect(tags.length).to.be.eql(0);
                     expect(creationDate).to.be.a('string');

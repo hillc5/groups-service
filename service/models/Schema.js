@@ -5,9 +5,6 @@ const { Schema } = require('mongoose'),
 const MemberSchema = Schema({
     name: { type: String, required: true },
     email: { type: String, unique: true, required: true },
-    //memberGroups: [ { type: ObjectId, ref: 'Group' } ],
-    //memberPosts: [ { type:  ObjectId, ref: 'Post' } ],
-    memberEvents: [ { type: ObjectId, ref: 'Event' } ],
     joinDate: Date
 });
 
@@ -27,7 +24,6 @@ const EventSchema = Schema({
     creator: { type: ObjectId, ref: 'Member', required: true },
     invitees: [ { type: ObjectId, ref: 'Member' } ],
     attendees: [ { type: ObjectId, ref: 'Member' } ],
-    posts: [ { type: ObjectId, ref: 'Post' } ],
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true }
 });
@@ -37,8 +33,6 @@ const GroupSchema = Schema({
     isPublic: { type: Boolean, default: true },
     description: String,
     members: [ { type: ObjectId, ref: 'Member' } ],
-    events: [ { type: ObjectId, ref: 'Event' } ],
-    posts: [ { type: ObjectId, ref: 'Post' } ],
     tags: [ String ],
     creationDate: Date,
     lastUpdated: Date,
