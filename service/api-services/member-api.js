@@ -1,4 +1,5 @@
 const memberData = require('../data-services/member-data'),
+      groupData = require('../data-services/group-data'),
       { sendError, validateRequest } = require('../util/validation'),
       validationType = 'member';
 
@@ -33,42 +34,33 @@ function getAllMemberGroups(req, res) {
     validateRequest({ req, paramOptions, validationType })
         .then(() => {
             const { memberId } = req.params,
-                  query = { _id: memberId },
-                  fields = 'memberGroups -_id',
-                  memberGroupOptions = {
-                      path: 'memberGroups',
-                      select: '-__v',
-                      populate: [
-                          {
-                              path: 'owner',
-                              select: 'name email'
-                          },
-                          {
-                              path: 'members',
-                              select: 'name email'
-                          },
-                          {
-                              path: 'posts',
-                              select: 'title text postDate',
-                              options: { sort: { postDate: -1 }, limit: 10 }
-                          },
-                          {
-                              path: 'events',
-                              select: 'name invitees attendees startDate endDate',
-                              options: { sort: { startDate: -1 }, limit: 10 }
-                          }
-                      ]
+                  query = { members: memberId },
+                  fields = '-__v',
+                  ownerOptions = {
+                      path: 'owner',
+                      select: 'name'
+                  }
+                  membersOptions = {
+                      path: 'members',
+                      select: 'name'
                   },
-                  refOptions = [ memberGroupOptions ];
+                  eventsOptions = {
+                      path: 'events',
+                      select: 'name invitees attendees startDate endDate',
+                      options: { sort: { startDate: -1 }, limit: 10 }
+                  },
+                  postsOptions = {
+                      path: 'posts',
+                      select: 'title text postDate',
+                      options: { sort: { postDate: -1 }, limit: 10 }
+                  },
+                  refOptions = [ ownerOptions, membersOptions, eventsOptions, postsOptions ];
 
-            return memberData.findMember(query, fields, refOptions);
+            return groupData.findGroups(query, fields, refOptions);
         })
-        .then(result => {
+        .then((result=[]) => {
             if (result) {
-                const { memberGroups=[] } = result;
-                res.status(200).send(memberGroups);
-            } else {
-                throw { status: 404, message: `No groups found for member: ${req.params.memberId}` };
+                res.status(200).send(result);
             }
 
         })

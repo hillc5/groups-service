@@ -23,6 +23,13 @@ function saveGroup(groupData) {
             });
 }
 
+function saveGroupV2(groupData) {
+    const group = new Group(groupData);
+
+    logger.info(`${DATA_NAME} - now saving group, ${groupData.name} for owner ${groupData.owner}`);
+    return group.save();
+}
+
 function addMemberToGroup(groupId, memberId) {
     const query = { _id: groupId },
           update = { $addToSet: { members: memberId }},
@@ -39,6 +46,30 @@ function addMemberToGroup(groupId, memberId) {
                 Member.findOneAndUpdate(memberQuery, memberUpdate).exec();
                 return group;
             });
+}
+
+function addMemberToGroupV2(groupId, memberId) {
+    const memberQuery = { _id: memberId };
+
+    return Member.findOne(memberQuery)
+            .then(member => {
+                if (!member) {
+                    throw { status: 404, message: `No Member found for id: ${memberId}`};
+                }
+
+                const groupQuery = { _id: groupId },
+                      update = { $addToSet: { members: memberId }},
+                      options = { new: true }
+
+                return Group.findOneAndUpdate(groupQuery, update, options)
+            })
+            .then(group => {
+                if (!group) {
+                    throw { status: 404, message: `No group found for id: ${groupId}` };
+                }
+
+                return group;
+            })
 }
 
 function findGroups(query, fields, refOptions) {
@@ -62,7 +93,9 @@ function findGroup(query, fields, refOptions) {
 
 module.exports = {
     saveGroup,
+    saveGroupV2,
     addMemberToGroup,
+    addMemberToGroupV2,
     findGroup,
     findGroups
 };

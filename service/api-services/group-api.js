@@ -20,7 +20,7 @@ function createGroup(req, res) {
                      creationDate: Date.now()
                   };
 
-            return groupData.saveGroup(newGroup)
+            return groupData.saveGroupV2(newGroup)
         })
         .then(result => res.status(201).send(result))
         .catch(sendError(res));
@@ -35,7 +35,7 @@ function addMemberToGroup(req, res) {
             const { groupId } = req.params,
                   { memberId } = req.body;
 
-            return groupData.addMemberToGroup(groupId, memberId);
+            return groupData.addMemberToGroupV2(groupId, memberId);
         })
         .then(result => {
             if (result) {

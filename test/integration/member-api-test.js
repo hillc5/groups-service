@@ -1,6 +1,6 @@
 const mongoose = require('mongoose'),
       { Member } = require('../../service/models/Model'),
-      { groupsService, saveTestMember, testMemberData } = require('../util/test-helpers'),
+      { groupsService, saveTestMember, saveTestGroup, testMemberData } = require('../util/test-helpers'),
 
       chai = require('chai'),
 
@@ -93,13 +93,12 @@ describe('member-api', () => {
                     expect(__v).to.be.eql(0);
                     expect(name).to.be.eql(newMember.name);
                     expect(email).to.be.eql(newMember.email);
-                    expect(memberGroups).to.be.an('array');
                     expect(memberEvents).to.be.an('array');
                     expect(memberPosts).to.be.an('array');
                     expect(joinDate).to.be.a('string');
                     expect(new Date(joinDate)).to.be.an.instanceOf(Date);
                     // make sure test fails if Member schema is updated
-                    expect(Object.keys(res.body).length).to.be.eql(8);
+                    expect(Object.keys(res.body).length).to.be.eql(7);
                     done();
             });
         });
@@ -167,8 +166,6 @@ describe('member-api', () => {
                     expect(_id).to.be.eql(memberId);
                     expect(name).to.be.eql(testMemberData.name);
                     expect(email).to.be.eql(testMemberData.email);
-                    expect(memberGroups).to.be.an('array');
-                    expect(memberGroups.length).to.be.eql(0);
                     expect(memberPosts).to.be.an('array');
                     expect(memberPosts.length).to.be.eql(0);
                     expect(memberEvents).to.be.an('array');
@@ -196,10 +193,10 @@ describe('member-api', () => {
         });
 
         it('should return 200 if call is successful', done => {
-            saveTestMember()
-                .then(member => {
+            saveTestGroup()
+                .then(group => {
                     return groupsService()
-                            .get(`/member/${member._id}/groups`);
+                            .get(`/member/${group.owner}/groups`);
                 })
                 .then(result => {
                     expect(result.status).to.be.eql(200);
