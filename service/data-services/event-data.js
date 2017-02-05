@@ -7,7 +7,7 @@ function saveEvent(eventData) {
     const event = new Event(eventData);
 
     logger.info(`${DATA_NAME} - now saving event, ${eventData.name}`);
-    return event.save()
+    return event.save();
 }
 
 function findEvents(query={}, fields='', refOptions=[]) {

@@ -144,7 +144,7 @@ describe('group-api', () => {
                         .send(newGroup);
                 })
                 .then(res => {
-                    const { _id, __v, owner, name, isPublic, description, members, posts, tags, creationDate } = res.body;
+                    const { _id, __v, owner, name, isPublic, description, members, tags, creationDate } = res.body;
                     expect(res.status).to.be.eql(201);
                     expect(_id).to.not.be.undefined;
                     expect(__v).to.be.eql(0);

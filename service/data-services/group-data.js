@@ -31,7 +31,7 @@ function addMemberToGroup(groupId, memberId) {
                 }
 
                 return group;
-            })
+            });
 }
 
 function findGroups(query={}, fields='', refOptions=[]) {
