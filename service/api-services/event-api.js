@@ -17,7 +17,7 @@ function createEvent(req, res) {
                       invitees: invitees.map(invitee => invitee.trim())
                   };
             // Add creator to invitees list
-            newEvent.invitees.push(newEvent.creator);
+            newEvent.invitees.unshift(newEvent.creator);
             return eventData.saveEvent(newEvent);
         })
         .then(result => {

@@ -272,8 +272,8 @@ describe('event-api', () => {
                     const { body: event } = result,
                           { invitees } = event;
 
-                    expect(invitees[0]).to.be.eql(memberOneId);
-                    expect(invitees[1]).to.be.eql(memberTwoId);
+                    expect(invitees).to.include(memberOneId);
+                    expect(invitees).to.include(memberTwoId);
                     done();
                 });
         });
@@ -475,7 +475,7 @@ describe('event-api', () => {
 
                     expect(event.invitees).to.not.be.undefined;
 
-                    const [ invitee ] = event.invitees;
+                    const [ creator, invitee ] = event.invitees;
 
                     expect(invitee.name).to.be.eql(newMember.name);
                     expect(invitee.email).to.be.eql(newMember.email);

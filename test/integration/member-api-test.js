@@ -445,7 +445,7 @@ describe('member-api', () => {
                     const { body: events } = result,
                           [ event ] = events,
                           { invitees } = event,
-                          [ invitedMember ] = invitees;
+                          [ creator, invitedMember ] = invitees;
 
                     expect(invitedMember._id).to.be.eql(memberId);
                     done();
@@ -618,7 +618,7 @@ describe('member-api', () => {
                     const { body: events } = result,
                           [ event ] = events,
                           { invitees } = event,
-                          [ invitedMember ] = invitees;
+                          [ creator, invitedMember ] = invitees;
 
                     expect(invitedMember._id).to.be.eql(memberId);
                     expect(invitedMember.name).to.not.be.undefined;
