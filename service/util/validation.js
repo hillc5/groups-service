@@ -32,7 +32,7 @@ function createValidationSchema(schemaType, fields) {
         type = schemaType.toLowerCase();
 
     fields.forEach(field => {
-        schema[field] = validationMap[type][field];
+        schema[field] = validationMap[field];
     });
 
     return schema;
@@ -50,16 +50,12 @@ function sendError(res) {
 }
 
 const sharedMappings = {
-    'id': (value) => ({
+    id: (value) => ({
         isMongoId: {
             errorMessage: `${value} must be a valid MongoDB ObjectId`
         }
     }),
-    'name': {
-        notEmpty: true,
-        errorMessage: 'Member name is required'
-    },
-    'date': {
+    date: {
         isDate: {
             errorMessage: 'startDate must be a valid Date string'
         }
@@ -67,40 +63,29 @@ const sharedMappings = {
 };
 
 const validationMap = {
-    group: {
-        'owner': sharedMappings.id('owner'),
-        'groupId': sharedMappings.id('groupId'),
-        'memberId': sharedMappings.id('memberId'),
-        'name': sharedMappings.name,
-        'isPublic': {
-            isBoolean: {
-                errorMessage: 'isPublic must be a boolean'
-            }
+    owner: sharedMappings.id('owner'),
+    groupId: sharedMappings.id('groupId'),
+    memberId: sharedMappings.id('memberId'),
+    eventId: sharedMappings.id('eventId'),
+    startDate: sharedMappings.date,
+    endDate: sharedMappings.date,
+    name: {
+        notEmpty: true,
+        errorMessage: 'Name is required'
+    },
+    email: {
+        isEmail: {
+            errorMessage: 'A valid email address is required'
         }
     },
-    member: {
-        'memberId': sharedMappings.id('memberId'),
-        'name': sharedMappings.name,
-        'email': {
-            isEmail: {
-                errorMessage: 'A valid email address is required'
-            }
+    isPublic: {
+        isBoolean: {
+            errorMessage: 'isPublic must be a boolean'
         }
-    },
-    event: {
-        'eventId': sharedMappings.id('eventId'),
-        'groupId': sharedMappings.id('groupId'),
-        'memberId': sharedMappings.id('memberId'),
-        'name': sharedMappings.name,
-        'startDate': sharedMappings.date,
-        'endDate': sharedMappings.date
     }
-};
-
+}
 
 module.exports = {
     validateRequest,
-    createValidationSchema,
-    sendError,
-    validationMap
+    sendError
 };
