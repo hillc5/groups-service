@@ -1,13 +1,12 @@
 const groupData = require('../data-services/group-data'),
       eventData = require('../data-services/event-data'),
       mongoose = require('mongoose'),
-      { validateRequest, sendError } = require('../util/validation'),
-      validationType = 'group';
+      { validateRequest, sendError } = require('../util/validation');
 
 function createGroup(req, res) {
     const bodyOptions = [ 'owner', 'name', 'isPublic' ];
 
-    validateRequest({ req, validationType, bodyOptions })
+    validateRequest({ req, bodyOptions })
         .then(() => {
             const { owner, name, description='', tags='', isPublic } = req.body,
 
@@ -31,7 +30,7 @@ function addMemberToGroup(req, res) {
     const paramOptions = [ 'groupId' ],
           bodyOptions = [ 'memberId' ];
 
-    validateRequest({ req, validationType, paramOptions, bodyOptions })
+    validateRequest({ req, paramOptions, bodyOptions })
         .then(() => {
             const { groupId } = req.params,
                   { memberId } = req.body;
@@ -51,7 +50,7 @@ function addMemberToGroup(req, res) {
 function findGroupById(req, res) {
     const paramOptions = [ 'groupId' ];
 
-    validateRequest({ req, validationType, paramOptions })
+    validateRequest({ req, paramOptions })
         .then(() => {
             const { groupId } = req.params,
                   query = { _id: groupId },
@@ -99,7 +98,7 @@ function findGroupById(req, res) {
 function getAllGroupEvents (req, res) {
     const paramOptions = [ 'groupId' ];
 
-    validateRequest({ req, paramOptions, validationType })
+    validateRequest({ req, paramOptions })
         .then(() => {
             const { groupId } = req.params,
                   query = { group: groupId },

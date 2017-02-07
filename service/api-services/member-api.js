@@ -1,14 +1,12 @@
 const memberData = require('../data-services/member-data'),
       groupData = require('../data-services/group-data'),
       eventData = require('../data-services/event-data'),
-      { sendError, validateRequest } = require('../util/validation'),
-      validationType = 'member';
+      { sendError, validateRequest } = require('../util/validation');
 
 function createMember(req, res) {
-    const bodyOptions = [ 'name', 'email' ],
-          validationType = 'member';
+    const bodyOptions = [ 'name', 'email' ];
 
-    validateRequest({ req, validationType, bodyOptions })
+    validateRequest({ req, bodyOptions })
         .then(() => {
             const { name, email } = req.body,
             newMember = {
@@ -26,10 +24,9 @@ function createMember(req, res) {
 }
 
 function getAllMemberGroups(req, res) {
-    const paramOptions = [ 'memberId' ],
-          validationType = 'member';
+    const paramOptions = [ 'memberId' ];
 
-    validateRequest({ req, paramOptions, validationType })
+    validateRequest({ req, paramOptions})
         .then(() => {
             const { memberId } = req.params,
                   query = { members: memberId },
@@ -66,10 +63,9 @@ function getAllMemberGroups(req, res) {
 }
 
 function getAllMemberEvents(req, res) {
-    const paramOptions = [ 'memberId' ],
-          validationType = 'member';
+    const paramOptions = [ 'memberId' ];
 
-    validateRequest({ req, paramOptions, validationType })
+    validateRequest({ req, paramOptions })
         .then(() => {
             const { memberId } = req.params,
                   query = {
@@ -119,10 +115,9 @@ function getAllMemberEvents(req, res) {
 }
 
 function findMemberById(req, res) {
-    const paramOptions = [ 'memberId' ],
-          validationType = 'member';
+    const paramOptions = [ 'memberId' ];
 
-    validateRequest({ req, paramOptions, validationType })
+    validateRequest({ req, paramOptions })
         .then(() => {
             const { memberId } = req.params,
                   query = { _id: memberId },

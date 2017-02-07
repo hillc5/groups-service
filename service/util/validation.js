@@ -1,18 +1,17 @@
 /**
- * Checks the request body and request parameters for any invalid attributes.
+ * Checks the request body, request query and request parameters for any invalid attributes.
  * Trims all inputs so that leading/trailing whitespace does not get added to
  * the data stores.
  *
  * @param  {HttpRequest} options.req         The node/express req object
- * @param  {String} options.validationType   model type, e.g. 'group' or 'member'
  * @param  {Array}  options.paramOptions     parameters that need to be validated
  * @param  {Array}  options.bodyOptions      body params that need to be validated
  * @return {Promise}                         Promise resolved with response, or rejected with error
  */
-function validateRequest({ req, validationType, paramOptions=[], bodyOptions=[], queryOptions=[] }={}) {
-    const paramValidationSchema = createValidationSchema(validationType, paramOptions),
-          bodyValidationSchema = createValidationSchema(validationType, bodyOptions),
-          queryValidationSchema = createValidationSchema(validationType, queryOptions);
+function validateRequest({ req, paramOptions=[], bodyOptions=[], queryOptions=[] }={}) {
+    const paramValidationSchema = createValidationSchema(paramOptions),
+          bodyValidationSchema = createValidationSchema(bodyOptions),
+          queryValidationSchema = createValidationSchema(queryOptions);
 
     // trim ALL the things!
     [ ...paramOptions, ...bodyOptions, ...queryOptions ].forEach(option => {
@@ -27,9 +26,8 @@ function validateRequest({ req, validationType, paramOptions=[], bodyOptions=[],
     return req.getValidationResult().then(result => result.throw());
 }
 
-function createValidationSchema(schemaType, fields) {
-    let schema = {},
-        type = schemaType.toLowerCase();
+function createValidationSchema(fields) {
+    let schema = {};
 
     fields.forEach(field => {
         schema[field] = validationMap[field];
@@ -40,6 +38,7 @@ function createValidationSchema(schemaType, fields) {
 
 function sendError(res) {
     return err => {
+        // err.mapped occurs when req.check... throws an error
         if (err && err.mapped) {
             res.status(400).send(err.mapped());
         } else {

@@ -1,11 +1,10 @@
 const eventData = require('../data-services/event-data'),
-      { sendError, validateRequest } = require('../util/validation'),
-      validationType = 'event';
+      { sendError, validateRequest } = require('../util/validation');
 
 function createEvent(req, res) {
     const bodyOptions = [ 'name', 'startDate', 'endDate', 'groupId', 'memberId' ];
 
-    validateRequest({ req, validationType, bodyOptions })
+    validateRequest({ req, bodyOptions })
         .then(() => {
             const { name, startDate, endDate, invitees=[], groupId, memberId } = req.body,
                   newEvent = {
@@ -29,7 +28,7 @@ function createEvent(req, res) {
 function getEventById(req, res) {
     const paramOptions = [ 'eventId' ];
 
-    validateRequest({ req, paramOptions, validationType })
+    validateRequest({ req, paramOptions })
         .then(() => {
             const { eventId } = req.params,
                   query = { _id: eventId },
@@ -77,7 +76,7 @@ function memberInvite(req, res) {
     const paramOptions = [ 'eventId' ],
           bodyOptions = [ 'memberId' ];
 
-    validateRequest({ req, validationType, paramOptions, bodyOptions })
+    validateRequest({ req, paramOptions, bodyOptions })
         .then(() => {
             const { eventId } = req.params,
                   { memberId } = req.body;
@@ -99,7 +98,7 @@ function memberAttend(req, res) {
     const paramOptions = [ 'eventId' ],
           bodyOptions = [ 'memberId' ];
 
-    validateRequest({ req, validationType, paramOptions, bodyOptions })
+    validateRequest({ req, paramOptions, bodyOptions })
         .then(() => {
             const { eventId } = req.params,
                   { memberId } = req.body;
