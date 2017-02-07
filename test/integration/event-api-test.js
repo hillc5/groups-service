@@ -697,7 +697,8 @@ describe('event-api', () => {
                     done();
                 });
 
-        });
+        })
+
 
         it('should return 400 if an invalid memberId is given', done => {
             const newEvent = {
@@ -748,6 +749,7 @@ describe('event-api', () => {
                     expect(false).to.be.true;
                 })
                 .catch(err => {
+                    console.log(err);
                     const { text } = err.response;
                     expect(err.status).to.be.eql(404);
                     expect(JSON.parse(text).message).to.be.eql(`No event found for id: ${groupId}`);

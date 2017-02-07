@@ -1,5 +1,6 @@
 const eventData = require('../data-services/event-data'),
-      { sendError, validateRequest } = require('../util/validation');
+      { sendError, validateRequest } = require('../util/validation'),
+      apiMethod = require('../util/api-util');
 
 function createEvent(req, res) {
     const bodyOptions = [ 'name', 'startDate', 'endDate', 'groupId', 'memberId' ];
@@ -94,6 +95,31 @@ function memberInvite(req, res) {
 
 }
 
+const memberAttendFn = (req, res) => {
+    return Promise.resolve()
+        .then(() => {
+            const { eventId } = req.params,
+            { memberId } = req.body;
+
+            return eventData.moveMemberToAttendees(eventId, memberId);
+        })
+        .then(result => {
+            console.log('HERE memberAttendFn', result);
+            if (result) {
+                res.status(200).send(result);
+            } else {
+                throw { status: 500, message: 'There was an error' };
+            }
+        })
+        .catch(err => { throw err });
+}
+
+const memberAttendV2 = apiMethod({
+    paramOptions: [ 'eventId' ],
+    bodyOptions: [ 'memberId' ],
+    apiFn: memberAttendFn
+});
+
 function memberAttend(req, res) {
     const paramOptions = [ 'eventId' ],
           bodyOptions = [ 'memberId' ];
@@ -119,5 +145,6 @@ module.exports = {
     createEvent,
     getEventById,
     memberInvite,
-    memberAttend
+    memberAttend,
+    memberAttendV2
 };
