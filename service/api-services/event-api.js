@@ -1,6 +1,6 @@
 const eventData = require('../data-services/event-data'),
       { sendError, validateRequest } = require('../util/validation'),
-      apiMethod = require('../util/api-util');
+      apiWrapper = require('../util/api-util');
 
 function createEvent(req, res) {
     const bodyOptions = [ 'name', 'startDate', 'endDate', 'groupId', 'memberId' ];
@@ -95,30 +95,28 @@ function memberInvite(req, res) {
 
 }
 
-const memberAttendFn = (req, res) => {
-    return Promise.resolve()
-        .then(() => {
-            const { eventId } = req.params,
-            { memberId } = req.body;
+function memberAttendV3(req, res) {
+    const paramOptions = [ 'eventId' ],
+          bodyOptions = [ 'memberId' ];
 
-            return eventData.moveMemberToAttendees(eventId, memberId);
-        })
-        .then(result => {
-            console.log('HERE memberAttendFn', result);
-            if (result) {
-                res.status(200).send(result);
-            } else {
-                throw { status: 500, message: 'There was an error' };
-            }
-        })
-        .catch(err => { throw err });
+    const apiFn = new Promise((resolve, reject) => {
+        const { eventId } = req.params,
+              { memberId } = req.body;
+
+        eventData.moveMemberToAttendees(eventId, memberId)
+            .then(result => {
+                if (result) {
+                    res.status(200).send(result);
+                    resolve();
+                } else {
+                    throw { status: 500, message: 'There was an error' };
+                }
+            })
+            .catch(reject);
+    });
+
+    apiWrapper({ req, res, paramOptions, bodyOptions, apiFn });
 }
-
-const memberAttendV2 = apiMethod({
-    paramOptions: [ 'eventId' ],
-    bodyOptions: [ 'memberId' ],
-    apiFn: memberAttendFn
-});
 
 function memberAttend(req, res) {
     const paramOptions = [ 'eventId' ],
@@ -146,5 +144,5 @@ module.exports = {
     getEventById,
     memberInvite,
     memberAttend,
-    memberAttendV2
+    memberAttendV3
 };
