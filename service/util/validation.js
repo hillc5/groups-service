@@ -50,6 +50,7 @@ function sendError(res) {
 
 const sharedMappings = {
     id: (value) => ({
+        optional: true,
         isMongoId: {
             errorMessage: `${value} must be a valid MongoDB ObjectId`
         }
@@ -68,6 +69,10 @@ const validationMap = {
     eventId: sharedMappings.id('eventId'),
     startDate: sharedMappings.date,
     endDate: sharedMappings.date,
+    text: {
+        notEmpty: true,
+        errorMessage: 'Text is required'
+    },
     name: {
         notEmpty: true,
         errorMessage: 'Name is required'

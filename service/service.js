@@ -10,6 +10,7 @@ const express = require('express'),
 
       groupAPI = require('./api-services/group-api'),
       eventAPI = require('./api-services/event-api'),
+      postAPI = require('./api-services/post-api'),
       memberAPI = require('./api-services/member-api');
 
 
@@ -48,6 +49,9 @@ function startService() {
     app.get('/event/:eventId', eventAPI.getEventById);
     app.post('/event/:eventId/invite', eventAPI.memberInvite);
     app.post('/event/:eventId/attend', eventAPI.memberAttend);
+
+    // Post API
+    app.post('/post', postAPI.createPost);
 
     app.listen(9000);
     logger.info('Now listening on port 9000');

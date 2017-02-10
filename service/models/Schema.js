@@ -9,7 +9,7 @@ const MemberSchema = Schema({
 });
 
 const PostSchema = Schema({
-    title: { type: String, required: true },
+    name: { type: String, required: true },
     text: { type: String, required: true },
     owner:  { type: ObjectId, ref: 'Member', required: true },
     group: { type: ObjectId, ref: 'Group', required: true },
