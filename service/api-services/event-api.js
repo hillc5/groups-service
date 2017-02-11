@@ -1,5 +1,6 @@
 const eventData = require('../data-services/event-data'),
-      { sendError, validateRequest } = require('../util/validation');
+      validateRequest = require('./util/api-validation'),
+      handleError = require('./util/api-error-handler');
 
 function createEvent(req, res) {
     const bodyOptions = [ 'name', 'startDate', 'endDate', 'groupId', 'memberId' ];
@@ -22,7 +23,7 @@ function createEvent(req, res) {
         .then(result => {
             res.status(201).send(result);
         })
-        .catch(sendError(res));
+        .catch(handleError(res));
 }
 
 function getEventById(req, res) {
@@ -69,7 +70,7 @@ function getEventById(req, res) {
                 throw { status: 404, message: `No event found for id: ${req.params.id}` };
             }
         })
-        .catch(sendError(res));
+        .catch(handleError(res));
 }
 
 function memberInvite(req, res) {
@@ -90,7 +91,7 @@ function memberInvite(req, res) {
                 throw { status: 500, message: 'There was an error' }
             }
         })
-        .catch(sendError(res));
+        .catch(handleError(res));
 
 }
 
@@ -112,7 +113,7 @@ function memberAttend(req, res) {
                 throw { status: 500, message: 'There was an error' };
             }
         })
-        .catch(sendError(res));
+        .catch(handleError(res));
 }
 
 module.exports = {

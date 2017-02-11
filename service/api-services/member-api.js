@@ -1,7 +1,8 @@
 const memberData = require('../data-services/member-data'),
       groupData = require('../data-services/group-data'),
       eventData = require('../data-services/event-data'),
-      { sendError, validateRequest } = require('../util/validation');
+      validateRequest = require('./util/api-validation'),
+      handleError = require('./util/api-error-handler');
 
 function createMember(req, res) {
     const bodyOptions = [ 'name', 'email' ];
@@ -20,7 +21,7 @@ function createMember(req, res) {
         .then(result => {
             res.status(201).send(result);
         })
-        .catch(sendError(res));
+        .catch(handleError(res));
 }
 
 function getAllMemberGroups(req, res) {
@@ -59,7 +60,7 @@ function getAllMemberGroups(req, res) {
             }
 
         })
-        .catch(sendError(res));
+        .catch(handleError(res));
 }
 
 function getAllMemberEvents(req, res) {
@@ -111,7 +112,7 @@ function getAllMemberEvents(req, res) {
             }
 
         })
-        .catch(sendError(res));
+        .catch(handleError(res));
 }
 
 function findMemberById(req, res) {
@@ -134,7 +135,7 @@ function findMemberById(req, res) {
                 throw { status: 404, message: `No member found with id ${req.params.memberId}` }
             }
         })
-        .catch(sendError(res));
+        .catch(handleError(res));
 }
 
 module.exports = {

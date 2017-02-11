@@ -1,7 +1,8 @@
 const groupData = require('../data-services/group-data'),
       eventData = require('../data-services/event-data'),
       mongoose = require('mongoose'),
-      { validateRequest, sendError } = require('../util/validation');
+      validateRequest = require('./util/api-validation'),
+      handleError = require('./util/api-error-handler');
 
 function createGroup(req, res) {
     const bodyOptions = [ 'owner', 'name', 'isPublic' ];
@@ -23,7 +24,7 @@ function createGroup(req, res) {
             return groupData.saveGroup(newGroup)
         })
         .then(result => res.status(201).send(result))
-        .catch(sendError(res));
+        .catch(handleError(res));
 }
 
 function addMemberToGroup(req, res) {
@@ -44,7 +45,7 @@ function addMemberToGroup(req, res) {
                 throw { status: 500, message: 'There was an error' }
             }
         })
-        .catch(sendError(res));
+        .catch(handleError(res));
 }
 
 function findGroupById(req, res) {
@@ -92,7 +93,7 @@ function findGroupById(req, res) {
             }
 
         })
-        .catch(sendError(res));
+        .catch(handleError(res));
 }
 
 function getAllGroupEvents (req, res) {
@@ -134,7 +135,7 @@ function getAllGroupEvents (req, res) {
         .then((result=[]) => {
             res.status(200).send(result);
         })
-        .catch(sendError(res));
+        .catch(handleError(res));
 }
 
 function findGroupsByTags(req, res) {
@@ -168,7 +169,7 @@ function findGroupsByTags(req, res) {
                 throw { status: 404, message: `No group found with ${req.query.tags}` };
             }
         })
-        .catch(sendError(res));
+        .catch(handleError(res));
 }
 
 module.exports = {

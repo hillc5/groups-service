@@ -1,4 +1,5 @@
-const { sendError, validateRequest } = require('../util/validation'),
+const validateRequest = require('./util/api-validation'),
+      handleError = require('./util/api-error-handler'),
       postData = require('../data-services/post-data');
 
 function createPost(req, res) {
@@ -28,7 +29,7 @@ function createPost(req, res) {
         .then(result => {
             res.status(201).send(result);
         })
-        .catch(sendError(res));
+        .catch(handleError(res));
 }
 
 

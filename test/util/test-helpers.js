@@ -58,10 +58,21 @@ function saveTestGroup() {
             });
 }
 
+function clearSavedTestData(done) {
+  const { Member, Event, Group, Post } = MODELS;
+
+  Member.remove({})
+    .then(() => Group.remove({}))
+    .then(() => Event.remove({}))
+    .then(() => Post.remove({}))
+    .then(() => done());
+}
+
 module.exports = {
     saveTestMember,
     saveTestGroup,
     groupsService,
     testMemberData,
-    testGroupData
+    testGroupData,
+    clearSavedTestData
 };

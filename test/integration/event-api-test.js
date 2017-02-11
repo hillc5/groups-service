@@ -1,6 +1,6 @@
 const mongoose = require('mongoose'),
       { Member, Group, Event } = require('../../service/models/Model'),
-      { groupsService, saveTestMember, saveTestGroup, testGroupData } = require('../util/test-helpers')
+      { clearSavedTestData, groupsService, saveTestMember, saveTestGroup, testGroupData } = require('../util/test-helpers')
 
       chai = require('chai'),
 
@@ -9,12 +9,9 @@ const mongoose = require('mongoose'),
 
 chai.use(chaiHttp);
 
-describe('event-api', () => {
+describe('event-api integration tests', () => {
     afterEach(done => {
-        Member.remove({})
-            .then(() => Group.remove({}))
-            .then(() => Event.remove({}))
-            .then(done());
+        clearSavedTestData(done);
     });
 
     describe('#createEvent', () => {

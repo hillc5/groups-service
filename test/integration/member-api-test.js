@@ -1,16 +1,16 @@
 const mongoose = require('mongoose'),
       { Member } = require('../../service/models/Model'),
-      { groupsService, saveTestMember, saveTestGroup, testMemberData } = require('../util/test-helpers'),
+      { clearSavedTestData, groupsService, saveTestMember, saveTestGroup, testMemberData } = require('../util/test-helpers'),
 
       chai = require('chai'),
 
       service = require('../../service/service'),
       expect = chai.expect;
 
-describe('member-api', () => {
+describe('member-api integration tests', () => {
 
     afterEach(done => {
-        Member.remove({}).then(done());
+        clearSavedTestData(done);
     });
 
     describe('#createMember', () => {
