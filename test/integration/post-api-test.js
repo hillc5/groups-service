@@ -36,11 +36,10 @@ describe('post-api integration tests', () => {
                     done();
                 })
                 .catch(err => {
-                    const { text } = err.response,
-                          errTxt = JSON.parse(text);
-
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(400);
-                    expect(errTxt.name.msg).to.be.eql('Name is required');
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('name');
                     done();
                 });
         });
@@ -66,11 +65,10 @@ describe('post-api integration tests', () => {
                     done();
                 })
                 .catch(err => {
-                    const { text } = err.response,
-                          errTxt = JSON.parse(text);
-
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(400);
-                    expect(errTxt.text.msg).to.be.eql('Text is required');
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('text');
                     done();
                 });
         });
@@ -96,11 +94,10 @@ describe('post-api integration tests', () => {
                     done();
                 })
                 .catch(err => {
-                    const { text } = err.response,
-                          errTxt = JSON.parse(text);
-
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(400);
-                    expect(errTxt.memberId.msg).to.be.eql('memberId must be a valid MongoDB ObjectId');
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('memberId');
                     done();
                 });
         });
@@ -126,11 +123,10 @@ describe('post-api integration tests', () => {
                     done();
                 })
                 .catch(err => {
-                    const { text } = err.response,
-                          errTxt = JSON.parse(text);
-
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(400);
-                    expect(errTxt.groupId.msg).to.be.eql('groupId must be a valid MongoDB ObjectId');
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('groupId');
                     done();
                 });
         });
@@ -157,11 +153,10 @@ describe('post-api integration tests', () => {
                     done();
                 })
                 .catch(err => {
-                    const { text } = err.response,
-                          errTxt = JSON.parse(text);
-
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(400);
-                    expect(errTxt.eventId.msg).to.be.eql('eventId must be a valid MongoDB ObjectId');
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('eventId');
                     done();
                 });
         });
@@ -188,11 +183,9 @@ describe('post-api integration tests', () => {
                     done();
                 })
                 .catch(err => {
-                    const { text } = err.response,
-                          errTxt = JSON.parse(text);
-
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(404);
-                    expect(errTxt.message).to.be.eql(`No member found for ${noMemberId}`);
+                    expect(error.message).to.be.eql(`No member found for ${noMemberId}`);
                     done();
                 });
         });
@@ -219,11 +212,9 @@ describe('post-api integration tests', () => {
                     done();
                 })
                 .catch(err => {
-                    const { text } = err.response,
-                          errTxt = JSON.parse(text);
-
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(404);
-                    expect(errTxt.message).to.be.eql(`No group found for ${noGroupId}`);
+                    expect(error.message).to.be.eql(`No group found for ${noGroupId}`);
                     done();
                 });
         });
@@ -251,11 +242,9 @@ describe('post-api integration tests', () => {
                     done();
                 })
                 .catch(err => {
-                    const { text } = err.response,
-                          errTxt = JSON.parse(text);
-
+                   const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(404);
-                    expect(errTxt.message).to.be.eql(`No event found for ${noEventId}`);
+                    expect(error.message).to.be.eql(`No event found for ${noEventId}`);
                     done();
                 });
         });

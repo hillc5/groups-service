@@ -30,10 +30,10 @@ describe('group-api integration tests', () => {
                     done();
                 })
                 .catch(err => {
-                    const error = JSON.parse(err.response.text);
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(400);
-                    expect(error.owner).to.not.be.undefined;
-                    expect(error.owner.param).to.be.eql('owner');
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('owner');
                     done();
                 });
         });
@@ -54,10 +54,10 @@ describe('group-api integration tests', () => {
                     done();
                 })
                 .catch(err => {
-                    const error = JSON.parse(err.response.text);
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(400);
-                    expect(error.name).to.not.be.undefined;
-                    expect(error.name.param).to.be.eql('name');
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('name');
                     done();
                 });
         });
@@ -77,10 +77,10 @@ describe('group-api integration tests', () => {
                     done();
                 })
                 .catch(err => {
-                    const error = JSON.parse(err.response.text);
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(400);
-                    expect(error.isPublic).to.not.be.undefined;
-                    expect(error.isPublic.param).to.be.eql('isPublic');
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('isPublic');
                     done();
                 });
         });
@@ -214,14 +214,17 @@ describe('group-api integration tests', () => {
                     done();
                 })
                 .catch(err => {
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(400);
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('groupId');
                     done();
                 });
         });
 
         it('should return 400 for incorrect format for memberId', done => {
             groupsService()
-                .post(`/group/5848ed108b3ccb3ffcc691d/member`)
+                .post(`/group/585d851c1b865511bb0543d2/member`)
                 .send({ memberId: 'wrongId' })
                 .then(result => {
                     // Fail if we hit this spot
@@ -229,7 +232,10 @@ describe('group-api integration tests', () => {
                     done();
                 })
                 .catch(err => {
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(400);
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('memberId');
                     done();
                 });
         });
@@ -276,7 +282,7 @@ describe('group-api integration tests', () => {
     });
 
     describe('#findGroupById', () => {
-        it('should return 400 if an invalid id is given', done => {
+        it('should return 400 if an invalid group id is given', done => {
             groupsService()
                 .get('/group/wrongId')
                 .then(response => {
@@ -285,7 +291,10 @@ describe('group-api integration tests', () => {
                     done();
                 })
                 .catch(err => {
+                   const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(400);
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('groupId');
                     done();
                 });
         });
@@ -378,7 +387,10 @@ describe('group-api integration tests', () => {
                     done();
                 })
                 .catch(err => {
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(400);
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('groupId');
                     done();
                 });
         });

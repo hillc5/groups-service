@@ -15,7 +15,7 @@ describe('member-api integration tests', () => {
 
     describe('#createMember', () => {
 
-        it('should return 404 if name is missing', done => {
+        it('should return 400 if name is missing', done => {
             const newMember = {
                 name: '',
                 email: 'Test@test.com'
@@ -30,15 +30,15 @@ describe('member-api integration tests', () => {
                     done();
                 })
                 .catch(err => {
-                    const error = JSON.parse(err.response.text);
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(400);
-                    expect(error.name).to.not.be.undefined;
-                    expect(error.name.param).to.be.eql('name');
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('name');
                     done();
                 });
         });
 
-        it('should return 404 if email is missing', done => {
+        it('should return 400 if email is missing', done => {
             const newMember = {
                 name: 'Test',
                 email: ''
@@ -53,10 +53,10 @@ describe('member-api integration tests', () => {
                     done();
                 })
                 .catch(err => {
-                    const error = JSON.parse(err.response.text);
-                    expect(err.status).to.be.equal(400);
-                    expect(error.email).to.not.be.undefined;
-                    expect(error.email.param).to.be.eql('email');
+                    const [ error ] = JSON.parse(err.response.text);
+                    expect(err.status).to.be.eql(400);
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('email');
                     done();
                 });
         });
@@ -103,7 +103,7 @@ describe('member-api integration tests', () => {
     });
 
     describe('#findMemberById', () => {
-        it('should return 400 if invalid id sent', done => {
+        it('should return 400 if invalid member id sent', done => {
             groupsService()
                 .get('/member/wrongID')
                 .then(res => {
@@ -112,10 +112,10 @@ describe('member-api integration tests', () => {
                     done();
                 })
                 .catch(err => {
-                    const error = JSON.parse(err.response.text);
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(400);
-                    expect(error.memberId).to.not.be.undefined;
-                    expect(error.memberId.param).to.be.eql('memberId');
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('memberId');
                     done();
                 });
         });
@@ -130,8 +130,8 @@ describe('member-api integration tests', () => {
                     done();
                 })
                 .catch(err => {
-                    const error = JSON.parse(err.response.text);
-                    expect(error.status).to.be.eql(404);
+                    const [ error ] = JSON.parse(err.response.text);
+                    expect(err.status).to.be.eql(404);
                     expect(error.message).to.be.eql(`No member found with id ${id}`);
                     done();
                 })
@@ -181,7 +181,10 @@ describe('member-api integration tests', () => {
                     done();
                 })
                 .catch(err => {
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(400);
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('memberId');
                     done();
                 })
         });
@@ -313,7 +316,10 @@ describe('member-api integration tests', () => {
                     done();
                 })
                 .catch(err => {
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(400);
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('memberId');
                     done();
                 })
         });

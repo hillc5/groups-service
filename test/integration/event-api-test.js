@@ -18,8 +18,8 @@ describe('event-api integration tests', () => {
         it('should return 400 if groupId is not a valid mongo ObjectId', done => {
             const newEvent = {
                   name: 'Test Event',
-                  startDate: Date.now(),
-                  endDate: Date.now(),
+                  startDate: new Date(),
+                  endDate: new Date(),
                   memberId: testGroupData.owner,
                   groupId: 'wrongId'
               };
@@ -32,10 +32,10 @@ describe('event-api integration tests', () => {
                     expect(false).to.be.true;
                 })
                 .catch(err => {
-                    const error = JSON.parse(err.response.text);
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(400);
-                    expect(error.groupId.param).to.not.be.undefined;
-                    expect(error.groupId.param).to.be.eql('groupId');
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('groupId');
                     done();
                 });
         });
@@ -43,8 +43,8 @@ describe('event-api integration tests', () => {
         it('should return 400 if memberId is not a valid mongo ObjectId', done => {
             const newEvent = {
                       name: 'Test Event',
-                      startDate: Date.now(),
-                      endDate: Date.now(),
+                      startDate: new Date(),
+                      endDate: new Date(),
                       groupId: testGroupData.owner,
                       memberId: 'wrongId'
                   };
@@ -57,18 +57,18 @@ describe('event-api integration tests', () => {
                     expect(false).to.be.true;
                 })
                 .catch(err => {
-                    const error = JSON.parse(err.response.text);
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(400);
-                    expect(error.memberId.param).to.not.be.undefined;
-                    expect(error.memberId.param).to.be.eql('memberId');
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('memberId');
                     done();
                 });
         });
 
         it('should return 400 if event name is missing', done => {
             const newEvent = {
-                      startDate: Date.now(),
-                      endDate: Date.now(),
+                      startDate: new Date(),
+                      endDate: new Date(),
                       groupId: testGroupData.owner,
                       memberId: testGroupData.owner
                   };
@@ -81,10 +81,10 @@ describe('event-api integration tests', () => {
                     expect(false).to.be.true;
                 })
                 .catch(err => {
-                    const error = JSON.parse(err.response.text);
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(400);
-                    expect(error.name.param).to.not.be.undefined;
-                    expect(error.name.param).to.be.eql('name');
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('name');
                     done();
                 });
         });
@@ -92,7 +92,7 @@ describe('event-api integration tests', () => {
         it('should return 400 if event startDate is missing', done => {
             const newEvent = {
                       name: 'Test Event',
-                      endDate: Date.now(),
+                      endDate: new Date(),
                       groupId: testGroupData.owner,
                       memberId: testGroupData.owner
                   };
@@ -105,10 +105,10 @@ describe('event-api integration tests', () => {
                     expect(false).to.be.true;
                 })
                 .catch(err => {
-                    const error = JSON.parse(err.response.text);
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(400);
-                    expect(error.startDate.param).to.not.be.undefined;
-                    expect(error.startDate.param).to.be.eql('startDate');
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('startDate');
                     done();
                 });
         });
@@ -116,7 +116,7 @@ describe('event-api integration tests', () => {
         it('should return 400 if event endDate is missing', done => {
             const newEvent = {
                       name: 'Test Event',
-                      startDate: Date.now(),
+                      startDate: new Date(),
                       groupId: testGroupData.owner,
                       memberId: testGroupData.owner
                   };
@@ -129,10 +129,10 @@ describe('event-api integration tests', () => {
                     expect(false).to.be.true;
                 })
                 .catch(err => {
-                    const error = JSON.parse(err.response.text);
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(400);
-                    expect(error.endDate.param).to.not.be.undefined;
-                    expect(error.endDate.param).to.be.eql('endDate');
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('endDate');
                     done();
                 });
         });
@@ -285,10 +285,10 @@ describe('event-api integration tests', () => {
                     expect(false).to.be.true;
                 })
                 .catch(err => {
-                    const error = JSON.parse(err.response.text);
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(400);
-                    expect(error.eventId.param).to.not.be.undefined;
-                    expect(error.eventId.param).to.be.eql('eventId');
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('eventId');
                     done();
                 });
         });
@@ -508,9 +508,12 @@ describe('event-api integration tests', () => {
                     expect(false).to.be.true;
                 })
                 .catch(err => {
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(400);
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('memberId');
                     done();
-                })
+                });
         });
 
         it('should return 404 if the event is not found', done => {
@@ -688,9 +691,10 @@ describe('event-api integration tests', () => {
                     expect(false).to.be.true;
                 })
                 .catch(err => {
-                    const { text } = err.response;
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(400);
-                    expect(JSON.parse(text).eventId).to.not.be.undefined;
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('eventId');
                     done();
                 });
 
@@ -722,9 +726,10 @@ describe('event-api integration tests', () => {
                     expect(false).to.be.true;
                 })
                 .catch(err => {
-                    const { text } = err.response;
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(400);
-                    expect(JSON.parse(text).memberId).to.not.be.undefined;
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('memberId');
                     done();
                 });
         });
@@ -745,9 +750,9 @@ describe('event-api integration tests', () => {
                     expect(false).to.be.true;
                 })
                 .catch(err => {
-                    const { text } = err.response;
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(404);
-                    expect(JSON.parse(text).message).to.be.eql(`No event found for id: ${groupId}`);
+                    expect(error.message).to.be.eql(`No event found for id: ${groupId}`);
                     done();
                 });
         });
@@ -785,9 +790,9 @@ describe('event-api integration tests', () => {
                     expect(false).to.be.true;
                 })
                 .catch(err => {
-                    const { text } = err.response;
+                    const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(404);
-                    expect(JSON.parse(text).message).to.be.eql(`No member found for id: ${memberToInviteId}`);
+                    expect(error.message).to.be.eql(`No member found for id: ${memberToInviteId}`);
                     done();
                 });
         });

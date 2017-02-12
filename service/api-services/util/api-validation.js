@@ -41,11 +41,11 @@ const sharedMappings = {
             errorMessage: `${value} must be a valid MongoDB ObjectId`
         }
     }),
-    date: {
+    date: (value) => ({
         isDate: {
-            errorMessage: 'startDate must be a valid Date string'
+            errorMessage: `${value} must be a valid Date string`
         }
-    }
+    })
 };
 
 const validationMap = {
@@ -53,8 +53,8 @@ const validationMap = {
     groupId: sharedMappings.id('groupId'),
     memberId: sharedMappings.id('memberId'),
     eventId: sharedMappings.id('eventId'),
-    startDate: sharedMappings.date,
-    endDate: sharedMappings.date,
+    startDate: sharedMappings.date('startDate'),
+    endDate: sharedMappings.date('endDate'),
     text: {
         notEmpty: true,
         errorMessage: 'Text is required'
