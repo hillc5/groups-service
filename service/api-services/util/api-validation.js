@@ -27,13 +27,11 @@ function validateRequest({ req, paramOptions=[], bodyOptions=[], queryOptions=[]
 }
 
 function createValidationSchema(fields) {
-    let schema = {};
-
-    fields.forEach(field => {
-        schema[field] = validationMap[field];
-    });
-
-    return schema;
+    return fields
+            .reduce((schema, field) => {
+                schema[field] = validationMap[field];
+                return schema;
+            }, {});
 }
 
 const sharedMappings = {
