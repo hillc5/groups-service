@@ -145,6 +145,7 @@ describe('group-api integration tests', () => {
                     expect(res.status).to.be.eql(201);
                     expect(_id).to.not.be.undefined;
                     expect(__v).to.be.eql(0);
+                    expect(name).to.be.eql(newGroup.name);
                     expect(owner).to.be.eql(newGroup.owner);
                     expect(isPublic).to.be.eql(newGroup.isPublic);
                     expect(description).to.be.a('string');
@@ -153,6 +154,8 @@ describe('group-api integration tests', () => {
                     expect(tags).to.be.an('array');
                     expect(tags.length).to.be.eql(0);
                     expect(creationDate).to.be.a('string');
+                    // make sure test fails if Member schema is updated
+                    expect(Object.keys(res.body).length).to.be.eql(9);
                     done();
                 });
         });

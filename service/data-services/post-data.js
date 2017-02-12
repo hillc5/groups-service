@@ -1,4 +1,5 @@
-const { Post, Member, Group, Event } = require('../models/Model'),
+const { Post } = require('../models/Model'),
+      checkExistenceById = require('./util/data-util'),
       logger = require('../util/logger'),
 
       DATA_NAME = 'POST_DATA';
@@ -20,28 +21,6 @@ function savePost(postData) {
 
                 logger.info(`${DATA_NAME} - now saving post, ${postData.name}`);
                 return post.save();
-            });
-}
-
-const entityMap = {
-    'group': Group,
-    'member': Member,
-    'event': Event
-}
-
-function checkExistenceById(entities) {
-    const entityPromises =
-        entities
-            .map(entity => entityMap[entity.type].findOne({ _id: entity.id }));
-
-    return Promise.all(entityPromises)
-            .then(results => {
-                results.forEach((result, index) => {
-                    if (!result) {
-                        const entity = entities[index];
-                        throw { status: 404, message: `No ${entity.type} found for ${entity.id}`};
-                    }
-                });
             });
 }
 

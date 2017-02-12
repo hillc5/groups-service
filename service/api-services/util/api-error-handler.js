@@ -1,9 +1,13 @@
+/**
+ * Builds and returns a new function that handles any errors that come back during api and data operations.
+ * The error messages are normalized and sent back to the client via the res object
+ *
+ * @param  {Response} res - The Response object to send back to the client
+ * @return {Function} - Function that will handle the errors and send them via tha res object
+ */
 function handleError(res) {
     return err => {
         // err.mapped occurs when req.check... throws an error
-        // TODO standardize the return so that the error message
-        // is the same shape as that thrown here and from data methods
-        // such as the message being stored in .message rather than .msg
         if (err && err.mapped) {
             res.status(400).send(mapExpressValidatorError(err));
         } else {
@@ -15,7 +19,10 @@ function handleError(res) {
 
 function mapExpressValidatorError(err) {
 
-    return err.array().map(error => ({ status: 404, parameter: error.param, message: error.msg }));
+    return err.array()
+            .map(error =>
+                ({ status: 404, parameter: error.param, message: error.msg })
+            );
 }
 
 module.exports = handleError;
