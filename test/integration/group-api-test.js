@@ -85,6 +85,28 @@ describe('group-api integration tests', () => {
                 });
         });
 
+        it('should return 404 if there is no member for the given owner', done => {
+            const newGroup = {
+                    owner: '585d851c1b865511bb0543d2',
+                    name: 'Test',
+                    isPublic: true
+                  };
+
+            groupsService()
+                .post('/group')
+                .send(newGroup)
+                .then(() => {
+                    // Fail if we hit this spot
+                    expect(false).to.be.true;
+                })
+                .catch(err => {
+                    const [ error ] = JSON.parse(err.response.text);
+                    expect(err.status).to.be.eql(404);
+                    expect(error.message).to.be.eql('No member found for 585d851c1b865511bb0543d2');
+                    done();
+                });
+        })
+
         it('should return 201 on success', done => {
             const newGroup = {
                       name: 'Test',
@@ -239,6 +261,45 @@ describe('group-api integration tests', () => {
                     expect(err.status).to.be.eql(400);
                     expect(error.parameter).to.not.be.undefined;
                     expect(error.parameter).to.be.eql('memberId');
+                    done();
+                });
+        });
+
+        it('should return 404 if the group does not exist for the given groupId', done => {
+
+            saveTestMember()
+                .then(member => {
+                    return groupsService()
+                        .post('/group/585d85e81b865511bb0543d5/member')
+                        .send({ memberId: member._id })
+                })
+                .then(() => {
+                    // Fail if we hit this spot
+                })
+                .catch(err => {
+                    const [ error ] = JSON.parse(err.response.text);
+                    expect(err.status).to.be.eql(404);
+                    expect(error.message).to.be.eql('No group found for 585d85e81b865511bb0543d5')
+                    done();
+                })
+        })
+
+        it('should return 404 if the member does not exist for the given memberId', done => {
+            saveTestGroup()
+                .then(group => {
+                    return groupsService()
+                            .post(`/group/${group._id}/member`)
+                            .send({ memberId: '585d851c1b865511bb0543d2'});
+                })
+                .then(() => {
+                    // Fail if we hit this spot
+                    expect(false).to.be.true;
+                    done();
+                })
+                .catch(err => {
+                    const [ error ] = JSON.parse(err.response.text);
+                    expect(err.status).to.be.eql(404);
+                    expect(error.message).to.be.eql('No member found for 585d851c1b865511bb0543d2')
                     done();
                 });
         });

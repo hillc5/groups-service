@@ -1,36 +1,38 @@
 const { Member, Group } = require('../models/Model'),
+      checkExistenceById = require('./util/data-util'),
       logger = require('../util/logger'),
 
       DATA_NAME = 'GROUP_DATA';
 
 function saveGroup(groupData) {
-    const group = new Group(groupData);
+    const entities = [
+            { type: 'member', id: groupData.owner }
+    ];
 
-    logger.info(`${DATA_NAME} - now saving group, ${groupData.name} for owner ${groupData.owner}`);
-    return group.save();
+    return checkExistenceById(entities)
+            .then(() => {
+                const group = new Group(groupData);
+
+                logger.info(`${DATA_NAME} - now saving group, ${groupData.name} for owner ${groupData.owner}`);
+                return group.save();
+            });
+
+
 }
 
 function addMemberToGroup(groupId, memberId) {
-    const memberQuery = { _id: memberId };
+    const entities = [
+            { type: 'member', id: memberId },
+            { type: 'group', id: groupId }
+    ];
 
-    return Member.findOne(memberQuery)
-            .then(member => {
-                if (!member) {
-                    throw { status: 404, message: `No Member found for id: ${memberId}`};
-                }
-
+    return checkExistenceById(entities)
+            .then(() => {
                 const groupQuery = { _id: groupId },
-                      update = { $addToSet: { members: memberId }},
-                      options = { new: true }
+                          update = { $addToSet: { members: memberId }},
+                          options = { new: true }
 
-                return Group.findOneAndUpdate(groupQuery, update, options)
-            })
-            .then(group => {
-                if (!group) {
-                    throw { status: 404, message: `No group found for id: ${groupId}` };
-                }
-
-                return group;
+                    return Group.findOneAndUpdate(groupQuery, update, options);
             });
 }
 

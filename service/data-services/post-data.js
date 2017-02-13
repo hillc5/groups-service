@@ -7,8 +7,8 @@ const { Post } = require('../models/Model'),
 function savePost(postData) {
     const { owner, group, event } = postData,
           entities = [
-            { type: 'member', id: owner },
-            { type: 'group', id: group }
+              { type: 'member', id: owner },
+              { type: 'group', id: group }
           ];
 
     if (event) {
