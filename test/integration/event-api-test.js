@@ -137,6 +137,97 @@ describe('event-api integration tests', () => {
                 });
         });
 
+        it('should return 404 if member does not exist for given creator id', done => {
+            const newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            let badMemberId = '585d851c1b865511bb0543d2';
+
+            saveTestGroup()
+                .then(group => {
+                    newEvent.groupId = group._id;
+                    newEvent.memberId = badMemberId;
+                    return groupsService()
+                            .post('/event')
+                            .send(newEvent);
+                })
+                .then(result => {
+                    // Fail test if we hit this block
+                    expect(false).to.be.true;
+                    done();
+                })
+                .catch(err => {
+                    const [ error ] = JSON.parse(err.response.text);
+                    expect(err.status).to.be.eql(404);
+                    expect(error.message).to.be.eql(`No member found for ${badMemberId}`);
+                    done();
+                });
+        });
+
+        it('should return 404 if group does not exist for given group id', done => {
+            const newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            let badGroupId   = '585d85e81b865511bb0543d5';
+
+            saveTestGroup()
+                .then(group => {
+                    newEvent.groupId = badGroupId;
+                    newEvent.memberId = group.owner;
+                    return groupsService()
+                            .post('/event')
+                            .send(newEvent);
+                })
+                .then(result => {
+                    // Fail test if we hit this block
+                    expect(false).to.be.true;
+                    done();
+                })
+                .catch(err => {
+                    const [ error ] = JSON.parse(err.response.text);
+                    expect(err.status).to.be.eql(404);
+                    expect(error.message).to.be.eql(`No group found for ${badGroupId}`);
+                    done();
+                });
+        });
+
+        it('should return 404 if member does not exist for given invitee id', done => {
+            const newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            let badMemberId = '585d851c1b865511bb0543d2';
+
+            saveTestGroup()
+                .then(group => {
+                    newEvent.groupId = group._id;
+                    newEvent.memberId = group.owner;
+                    newEvent.invitees = [ badMemberId ];
+                    return groupsService()
+                            .post('/event')
+                            .send(newEvent);
+                })
+                .then(result => {
+                    // Fail test if we hit this block
+                    expect(false).to.be.true;
+                    done();
+                })
+                .catch(err => {
+                    const [ error ] = JSON.parse(err.response.text);
+                    expect(err.status).to.be.eql(404);
+                    expect(error.message).to.be.eql(`No member found for ${badMemberId}`);
+                    done();
+                });
+        });
+
         it('should return 201 if event is created successfully', done => {
             const newEvent = {
                       name: 'Test Event',
@@ -292,6 +383,21 @@ describe('event-api integration tests', () => {
                     done();
                 });
         });
+
+        it('should return 404 if no event found for given id', done => {
+            groupsService()
+                .get('/event/585d85e81b865511bb0543d5')
+                .then(() => {
+                    // Fail test if we hit this block
+                    expect(false).to.be.true;
+                })
+                .catch(err => {
+                    const [ error ] = JSON.parse(err.response.text);
+                    expect(err.status).to.be.eql(404);
+                    expect(error.message).to.be.eql('No event found for 585d85e81b865511bb0543d5');
+                    done();
+                });
+        })
 
         it('should return 200 if an event is found successfully', done => {
             const newGroup = {
@@ -517,18 +623,78 @@ describe('event-api integration tests', () => {
         });
 
         it('should return 404 if the event is not found', done => {
-            groupsService()
-                .post('/event/585d851c1b865511bb0543d2/event')
-                .send({ memberId: '585d851c1b865511bb0543d2' })
+            const newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            let badEventId = '585d851c1b865511bb0543d2';
+
+            saveTestGroup()
+                .then(group => {
+                    newEvent.groupId = group._id;
+                    newEvent.memberId = group.owner;
+                    return groupsService()
+                            .post('/event')
+                            .send(newEvent);
+                })
+                .then(result => {
+                    return saveTestMember()
+                })
+                .then(member => {
+                    return groupsService()
+                            .post(`/event/${badEventId}/invite`)
+                            .send({ memberId: member._id });
+                })
                 .then(result => {
                     // Fail test if we hit this block
                     expect(false).to.be.true;
-                })
-                .catch(err => {
-                    expect(err.status).to.be.eql(404);
                     done();
                 })
-        })
+                .catch(err => {
+                    const [ error ] = JSON.parse(err.response.text);
+                    expect(err.status).to.be.eql(404);
+                    expect(error.message).to.be.eql(`No event found for ${badEventId}`);
+                    done();
+                })
+        });
+
+        it('should return 404 if the member does not exist for the given invitee id', done => {
+            const newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            let badMemberId = '585d851c1b865511bb0543d2';
+
+            saveTestGroup()
+                .then(group => {
+                    newEvent.groupId = group._id;
+                    newEvent.memberId = group.owner;
+                    return groupsService()
+                            .post('/event')
+                            .send(newEvent);
+                })
+                .then(result => {
+                    const { body: event } = result;
+                    return groupsService()
+                            .post(`/event/${event._id}/invite`)
+                            .send({ memberId: badMemberId });
+                })
+                .then(result => {
+                    // Fail test if we hit this block
+                    expect(false).to.be.true;
+                    done();
+                })
+                .catch(err => {
+                    const [ error ] = JSON.parse(err.response.text);
+                    expect(err.status).to.be.eql(404);
+                    expect(error.message).to.be.eql(`No member found for ${badMemberId}`);
+                    done();
+                })
+        });
 
         it('should return 200 on success', done => {
             const newEvent = {
@@ -734,15 +900,15 @@ describe('event-api integration tests', () => {
                 });
         });
 
-        it('should return 404 if there is no event for the given eventId', done => {
+        it('should return 404 if there is no event for the given event id', done => {
 
-            let groupId;
+            let badEventId;
 
             saveTestGroup()
                 .then(group => {
-                    groupId = group._id;
+                    badEventId = group._id;
                     return groupsService()
-                            .post(`/event/${groupId}/attend`)
+                            .post(`/event/${badEventId}/attend`)
                             .send({ memberId: group.owner });
                 })
                 .then(result => {
@@ -752,12 +918,53 @@ describe('event-api integration tests', () => {
                 .catch(err => {
                     const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(404);
-                    expect(error.message).to.be.eql(`No event found for id: ${groupId}`);
+                    expect(error.message).to.be.eql(`No event found for ${badEventId}`);
                     done();
                 });
         });
 
-        it('should return 404 if there is no member in the invitees array for the given memberId', done => {
+        it('should return 404 if no member exists for the given member id', done => {
+            const badMemberId = '585d851c1b865511bb0543d2';
+
+            const newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate: new Date()
+                  };
+
+            let eventId;
+
+            saveTestMember()
+                .then(member => {
+                    return saveTestGroup();
+                })
+                .then(group => {
+                    newEvent.groupId = group._id;
+                    newEvent.memberId = group.owner;
+                    newEvent.invitees = [ group.owner ];
+                    return groupsService()
+                            .post('/event')
+                            .send(newEvent);
+                })
+                .then(result => {
+                    eventId = result.body._id;
+                    return groupsService()
+                            .post(`/event/${eventId}/attend`)
+                            .send({ memberId: badMemberId });
+                })
+                .then(result => {
+                    // Fail test if we hit this block
+                    expect(false).to.be.true;
+                })
+                .catch(err => {
+                    const [ error ] = JSON.parse(err.response.text);
+                    expect(err.status).to.be.eql(404);
+                    expect(error.message).to.be.eql(`No member found for ${badMemberId}`);
+                    done();
+                });
+        });
+
+        it('should return 404 if there is no member in the invitees array matching the given member id', done => {
             const newEvent = {
                       name: 'Test Event',
                       startDate: new Date(),
@@ -792,7 +999,7 @@ describe('event-api integration tests', () => {
                 .catch(err => {
                     const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(404);
-                    expect(error.message).to.be.eql(`No member found for id: ${memberToInviteId}`);
+                    expect(error.message).to.be.eql(`No member found in invitees for ${memberToInviteId}`);
                     done();
                 });
         });

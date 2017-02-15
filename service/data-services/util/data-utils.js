@@ -8,7 +8,8 @@ const entityMap = {
 
 /**
  * Utility method that checks the data store for the
- * given list of entities, throws 404 if the entities do not exist.
+ * given list of entities, throws 404 for the first entity
+ * that is not found.
  *
  * @param  {Array} entities - Array of entity information objects of the form:
  *
@@ -16,7 +17,7 @@ const entityMap = {
  *
  * @return {Promise} - Promise resolves if all entities are found
  */
-function checkExistenceById(entities) {
+function verifyEntitiesExist(entities) {
     const entityPromises =
         entities
             .map(entity => entityMap[entity.type].findOne({ _id: entity.id }));
@@ -32,4 +33,4 @@ function checkExistenceById(entities) {
             });
 }
 
-module.exports = checkExistenceById;
+module.exports = verifyEntitiesExist;

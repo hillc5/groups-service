@@ -129,7 +129,6 @@ function findMemberById(req, res) {
         })
         .then(result => {
             if (result) {
-
                 res.status(200).send(result);
             } else {
                 throw { status: 404, message: `No member found with id ${req.params.memberId}` }

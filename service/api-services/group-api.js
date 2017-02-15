@@ -89,7 +89,7 @@ function findGroupById(req, res) {
             if (result) {
                 res.status(200).send(result);
             } else {
-                throw { status: 404, message: `No group found with ${req.params.id}` };
+                throw { status: 404, message: `No group found for ${req.params.groupId}` };
             }
 
         })

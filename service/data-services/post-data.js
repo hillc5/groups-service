@@ -1,5 +1,5 @@
 const { Post } = require('../models/Model'),
-      checkExistenceById = require('./util/data-util'),
+      verifyEntitiesExist = require('./util/data-utils'),
       logger = require('../util/logger'),
 
       DATA_NAME = 'POST_DATA';
@@ -15,7 +15,7 @@ function savePost(postData) {
         entities.push({ type: 'event', id: event });
     }
 
-    return checkExistenceById(entities)
+    return verifyEntitiesExist(entities)
             .then(() => {
                 const post = new Post(postData);
 

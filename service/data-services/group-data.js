@@ -1,5 +1,5 @@
 const { Member, Group } = require('../models/Model'),
-      checkExistenceById = require('./util/data-util'),
+      verifyEntitiesExist = require('./util/data-utils'),
       logger = require('../util/logger'),
 
       DATA_NAME = 'GROUP_DATA';
@@ -9,7 +9,7 @@ function saveGroup(groupData) {
             { type: 'member', id: groupData.owner }
     ];
 
-    return checkExistenceById(entities)
+    return verifyEntitiesExist(entities)
             .then(() => {
                 const group = new Group(groupData);
 
@@ -26,7 +26,7 @@ function addMemberToGroup(groupId, memberId) {
             { type: 'group', id: groupId }
     ];
 
-    return checkExistenceById(entities)
+    return verifyEntitiesExist(entities)
             .then(() => {
                 const groupQuery = { _id: groupId },
                           update = { $addToSet: { members: memberId }},

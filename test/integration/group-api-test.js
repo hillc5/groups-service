@@ -363,6 +363,22 @@ describe('group-api integration tests', () => {
                 });
         });
 
+        it('should return 404 if no group is found for the given id', done => {
+            groupsService()
+                .get('/group/585d85e81b865511bb0543d5')
+                .then(response => {
+                    // Should fail if we hit here
+                    expect(false).to.be.true;
+                    done();
+                })
+                .catch(err => {
+                   const [ error ] = JSON.parse(err.response.text);
+                    expect(err.status).to.be.eql(404);
+                    expect(error.message).to.be.eql('No group found for 585d85e81b865511bb0543d5');
+                    done();
+                });
+        });
+
         it('should return 200 for a valid group id', done => {
             const groupData = {
                       name: 'Test',

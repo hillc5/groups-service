@@ -67,7 +67,7 @@ function getEventById(req, res) {
             if (result) {
                 res.status(200).send(result);
             } else {
-                throw { status: 404, message: `No event found for id: ${req.params.id}` };
+                throw { status: 404, message: `No event found for ${req.params.eventId}` };
             }
         })
         .catch(handleError(res));

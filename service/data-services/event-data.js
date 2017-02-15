@@ -1,13 +1,29 @@
 const { Event, Member, Group } = require('../models/Model'),
+      verifyEntitiesExist = require('./util/data-utils'),
       logger = require('../util/logger'),
 
       DATA_NAME = 'MEMBER_DATA';
 
 function saveEvent(eventData) {
-    const event = new Event(eventData);
+    const { creator, group, invitees } = eventData,
+          entities = [
+              { type: 'member', id: creator },
+              { type: 'group', id: group }
+          ];
 
-    logger.info(`${DATA_NAME} - now saving event, ${eventData.name}`);
-    return event.save();
+    if (invitees && invitees.length) {
+        invitees.forEach(invitee => {
+            entities.push({ type: 'member', id: invitee });
+        });
+    }
+
+    return verifyEntitiesExist(entities)
+            .then(() => {
+                const event = new Event(eventData);
+
+                logger.info(`${DATA_NAME} - now saving event, ${eventData.name}`);
+                return event.save();
+            });
 }
 
 function findEvents(query={}, fields='', refOptions=[]) {
@@ -29,37 +45,38 @@ function findEvent(query={}, fields='', refOptions=[]) {
 }
 
 function addMemberToInvitees(eventId, memberId) {
-    const query = { _id: eventId },
-          update = { $addToSet: { invitees: memberId }},
-          options = { new: true };
+    const entities = [
+        { type: 'event', id: eventId },
+        { type: 'member', id: memberId }
+    ];
 
-    let result;
+    return verifyEntitiesExist(entities)
+            .then(() => {
+                const query = { _id: eventId },
+                      update = { $addToSet: { invitees: memberId }},
+                      options = { new: true };
 
-    return Event.findOneAndUpdate(query, update, options)
-            .exec()
-            .then(event => {
-                if (!event) {
-                    throw { status: 404, message: `No event found for id: ${eventId}` };
-                }
-                return event;
+                return Event.findOneAndUpdate(query, update, options).exec();
             });
 }
 
 function moveMemberToAttendees(eventId, memberId) {
-    const query = { _id: eventId };
+    const entities = [
+        { type: 'event', id: eventId },
+        { type: 'member', id: memberId }
+    ];
 
-    return Event.findOne(query)
+    return verifyEntitiesExist(entities)
+            .then(() => {
+                const query = { _id: eventId };
+
+                return Event.findOne(query)
+            })
             .then(event => {
-                let index;
-
-                if (!event) {
-                    throw { status: 404, message: `No event found for id: ${eventId}` };
-                }
-
-                index = event.invitees.findIndex(invitee => invitee.equals(memberId));
+                let index = event.invitees.findIndex(invitee => invitee.equals(memberId));
 
                 if (index < 0) {
-                    throw { status: 404, message: `No member found for id: ${memberId}` };
+                    throw { status: 404, message: `No member found in invitees for ${memberId}` };
                 }
 
                 event.invitees.splice(index, 1);
