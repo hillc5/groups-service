@@ -940,6 +940,96 @@ describe('member-api integration tests', () => {
                     expect()
                     done();
                 });
+        });
+
+        it('should return an undefined event if not an event level post', done => {
+            const newPost = {
+                      name: 'Test Post',
+                      text: 'This is a test post',
+
+                  };
+
+            let memberId, groupId, memberName, memberEmail;
+
+            saveTestGroup()
+                .then(group => {
+                    const { owner, _id } = group
+                    memberId = owner,
+                    groupId = _id;
+
+                    newPost.memberId = memberId;
+                    newPost.groupId = groupId;
+
+                    return groupsService()
+                            .post('/post')
+                            .send(newPost);
+                })
+                .then(result => {
+                    return groupsService()
+                            .get(`/member/${memberId}/posts`);
+                })
+                .then(result => {
+                    const { body: posts } = result,
+                          [ post ] = posts,
+                          { event } = post;
+
+                    expect(result.status).to.be.eql(200);
+                    expect(event).to.be.undefined;
+                    expect()
+                    done();
+                });
+        });
+
+        it('should return event name if post is event level', done => {
+            const eventPost = {
+                      name: 'Event Post',
+                      text: 'This is an event post'
+                  },
+                  newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate : new Date()
+                  };
+
+            let memberId, groupId, eventId;
+
+            saveTestGroup()
+                .then(group => {
+                    groupId = group._id;
+                    memberId = group.owner;
+
+                    newEvent.groupId = groupId;
+                    newEvent.memberId = memberId;
+
+                    eventPost.memberId = memberId;
+                    eventPost.groupId = groupId;
+
+                    return groupsService()
+                            .post('/event')
+                            .send(newEvent);
+                })
+                .then(result => {
+                    const { body: event } = result;
+                    eventId = event._id;
+                    eventPost.eventId = eventId;
+
+                    return groupsService()
+                            .post('/post')
+                            .send(eventPost);
+                })
+                .then(result => {
+                    return groupsService()
+                            .get(`/member/${memberId}/posts`);
+                })
+                .then(result => {
+                    const { body: posts } = result,
+                          [ post ] = posts,
+                          { event } = post;
+
+                    expect(result.status).to.be.eql(200);
+                    expect(event.name).to.be.eql(newEvent.name);
+                    done();
+                });
         })
     });
 });
