@@ -861,5 +861,45 @@ describe('member-api integration tests', () => {
                     done();
                 });
         });
+
+        it('should return owner name and email', done => {
+            const newPost = {
+                      name: 'Test Post',
+                      text: 'This is a test post',
+
+                  };
+
+            let memberId, groupId, memberName, memberEmail;
+
+            saveTestGroup()
+                .then(group => {
+                    const { owner, _id } = group
+                    memberId = owner,
+                    groupId = _id;
+
+                    newPost.memberId = memberId;
+                    newPost.groupId = groupId;
+
+                    return groupsService()
+                            .post('/post')
+                            .send(newPost);
+                })
+                .then(result => {
+                    return groupsService()
+                            .get(`/member/${memberId}/posts`);
+                })
+                .then(result => {
+                    const { body: posts } = result,
+                          [ post ] = posts,
+                          { _id, name, email } = post.owner;
+
+                    expect(result.status).to.be.eql(200);
+                    expect(_id).to.be.eql(memberId);
+                    expect(name).to.not.be.undefined;
+                    expect(email).to.not.be.undefined;
+                    expect()
+                    done();
+                });
+        })
     })
 });

@@ -126,7 +126,7 @@ function getAllMemberPosts(req, res) {
                   fields = '-__v',
                   ownerOptions = {
                       path: 'owner',
-                      select: 'name email fields'
+                      select: 'name email'
                   },
                   groupOptions = {
                       path: 'group',

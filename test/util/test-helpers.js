@@ -9,7 +9,7 @@ const MODELS = require('../../service/models/Model'),
 chai.use(chaiHttp);
 
 const testMemberData = {
-          name: 'Test',
+          name: 'Test Guy',
           email: getRandomEmailAddress(),
           joinDate: new Date()
       };
