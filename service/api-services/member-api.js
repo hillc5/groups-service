@@ -1,6 +1,7 @@
 const memberData = require('../data-services/member-data'),
       groupData = require('../data-services/group-data'),
       eventData = require('../data-services/event-data'),
+      postData = require('../data-services/post-data'),
       validateRequest = require('./util/api-validation'),
       handleError = require('./util/api-error-handler');
 
@@ -115,6 +116,37 @@ function getAllMemberEvents(req, res) {
         .catch(handleError(res));
 }
 
+function getAllMemberPosts(req, res) {
+    const paramOptions = [ 'memberId' ];
+
+    validateRequest({ req, paramOptions })
+        .then(() => {
+            const { memberId } = req.params,
+                  query = { owner: memberId },
+                  fields = '-__v',
+                  ownerOptions = {
+                      path: 'owner',
+                      select: 'name email fields'
+                  },
+                  groupOptions = {
+                      path: 'group',
+                      select: 'name'
+                  },
+                  eventOptions = {
+                      path: 'event',
+                      select: 'name'
+                  },
+                  refOptions = [ ownerOptions, groupOptions, eventOptions ];
+
+            return postData.findPosts(query, fields, refOptions);
+
+        })
+        .then((result=[]) => {
+            res.status(200).send(result);
+        })
+        .catch(handleError(res));
+}
+
 function findMemberById(req, res) {
     const paramOptions = [ 'memberId' ];
 
@@ -141,5 +173,6 @@ module.exports = {
     createMember,
     findMemberById,
     getAllMemberGroups,
-    getAllMemberEvents
+    getAllMemberEvents,
+    getAllMemberPosts
 }

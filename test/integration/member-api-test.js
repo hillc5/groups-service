@@ -680,5 +680,187 @@ describe('member-api integration tests', () => {
                     done();
                 });
         });
+    });
+
+    describe('#getAllMemberPosts', () => {
+        it('should return 400 if memberId is an invalid ObjectId', done => {
+            groupsService()
+                .get('/member/wrongId/posts')
+                .then(result => {
+                    // Fail if we hit this spot
+                    expect(false).to.be.true;
+                    done();
+                })
+                .catch(err => {
+                    const [ error ] = JSON.parse(err.response.text);
+                    expect(err.status).to.be.eql(400);
+                    expect(error.parameter).to.be.eql('memberId');
+                    done();
+                })
+        });
+
+        it('should return 200 if call is successful', done => {
+            const newPost = {
+                      name: 'Test Post',
+                      text: 'This is a test post',
+
+                  };
+
+            let memberId, groupId;
+
+            saveTestGroup()
+                .then(group => {
+                    memberId = group.owner,
+                    groupId = group._id;
+
+                    newPost.memberId = memberId;
+                    newPost.groupId = groupId;
+
+                    return groupsService()
+                            .post('/post')
+                            .send(newPost);
+                })
+                .then(result => {
+                    return groupsService()
+                            .get(`/member/${memberId}/posts`);
+                })
+                .then(result => {
+                    const { body: posts } = result;
+                    expect(result.status).to.be.eql(200);
+                    expect(posts[0].owner._id).to.be.eql(memberId);
+                    done();
+                });
+        });
+
+        it('should return an empty array if there are no posts for the given memberId', done => {
+            saveTestMember()
+                .then(member => {
+                    return groupsService()
+                            .get(`/member/${member._id}/posts`);
+                })
+                .then(result => {
+                    const { body: posts } = result;
+                    expect(result.status).to.be.eql(200);
+                    expect(posts).to.be.an.array;
+                    expect(posts.length).to.be.eql(0);
+                    done();
+                })
+        });
+
+        it('should return multiple events when they have been saved', done => {
+            const newPostOne = {
+                      name: 'Test Post One',
+                      text: 'One'
+                  },
+                  newPostTwo = {
+                      name: 'Test Post Two',
+                      text: 'Two'
+                  };
+
+            saveTestGroup()
+                .then(group => {
+                    memberId = group.owner,
+                    groupId = group._id;
+
+                    newPostOne.memberId = memberId;
+                    newPostTwo.memberId = memberId;
+                    newPostOne.groupId = groupId;
+                    newPostTwo.groupId = groupId;
+
+                    return groupsService()
+                            .post('/post')
+                            .send(newPostOne);
+                })
+                .then(result => {
+                    return groupsService()
+                            .post('/post')
+                            .send(newPostTwo);
+                })
+                .then(result => {
+                    return groupsService()
+                            .get(`/member/${memberId}/posts`);
+                })
+                .then(result => {
+                    const { body: posts } = result;
+                    const [ postOne, postTwo ] = posts;
+                    expect(posts.length).to.be.eql(2);
+                    expect(postOne.text).to.be.eql(newPostOne.text);
+                    expect(postOne.owner._id).to.be.eql(memberId);
+                    expect(postTwo.owner._id).to.be.eql(memberId);
+                    expect(postTwo.text).to.be.eql(newPostTwo.text);
+                    done();
+                })
+        });
+
+        it('should return posts for groups and events', done => {
+            const eventPost = {
+                      name: 'Event Post',
+                      text: 'This is an event post'
+                  },
+                  groupPost = {
+                      name: 'Group Post',
+                      text: 'This is a group post'
+                  },
+                  newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate : new Date()
+                  };
+
+            let memberId, groupId, eventId;
+
+            saveTestGroup()
+                .then(group => {
+                    groupId = group._id;
+                    memberId = group.owner;
+
+                    newEvent.groupId = groupId;
+                    newEvent.memberId = memberId;
+
+                    groupPost.memberId = memberId;
+                    groupPost.groupId = groupId;
+
+                    eventPost.memberId = memberId;
+                    eventPost.groupId = groupId;
+
+                    return groupsService()
+                            .post('/event')
+                            .send(newEvent);
+                })
+                .then(result => {
+                    const { body: event } = result;
+                    eventId = event._id;
+                    eventPost.eventId = eventId;
+
+                    return groupsService()
+                            .post('/post')
+                            .send(eventPost);
+                })
+                .then(result => {
+                    return groupsService()
+                            .post('/post')
+                            .send(groupPost);
+                })
+                .then(result => {
+                    return groupsService()
+                            .get(`/member/${memberId}/posts`);
+                })
+                .then(result => {
+                    const { body: posts } = result;
+                    expect(result.status).to.be.eql(200);
+                    expect(posts.length).to.be.eql(2);
+
+                    const [ eventPost, groupPost ] = posts;
+
+                    expect(eventPost.event._id).to.be.eql(eventId);
+                    expect(eventPost.group._id).to.be.eql(groupId);
+                    expect(eventPost.owner._id).to.be.eql(memberId);
+
+                    expect(groupPost.group._id).to.be.eql(groupId);
+                    expect(groupPost.event).to.be.undefined;
+                    expect(groupPost.owner._id).to.be.eql(memberId);
+                    done();
+                });
+        });
     })
 });

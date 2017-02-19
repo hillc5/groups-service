@@ -24,6 +24,16 @@ function savePost(postData) {
             });
 }
 
+function findPosts(query={}, fields='', refOptions=[]) {
+    let postQuery = Post.find(query)
+                        .select(fields)
+                        .populate(refOptions);
+
+    logger.info(`${DATA_NAME} - find posts by ${JSON.stringify(query)}`);
+    return postQuery.exec();
+}
+
 module.exports = {
-    savePost
+    savePost,
+    findPosts
 }

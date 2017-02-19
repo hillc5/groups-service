@@ -277,6 +277,53 @@ describe('post-api integration tests', () => {
                     expect(post.owner).to.be.eql(memberId);
                     done();
                 });
-        })
+        });
+
+        it('should return 201 on a successful Event level post', done => {
+            const newPost = {
+                      name: 'Test Post',
+                      text: 'This is a test post'
+                  },
+                  newEvent = {
+                      name: 'Test Event',
+                      startDate: new Date(),
+                      endDate : new Date()
+                  };
+
+            let memberId, groupId, eventId;
+
+            saveTestGroup()
+                .then(group => {
+                    groupId = group._id;
+                    memberId = group.owner;
+
+                    newEvent.groupId = groupId;
+                    newEvent.memberId = memberId;
+                    newPost.memberId = memberId;
+                    newPost.groupId = groupId;
+
+                    return groupsService()
+                            .post('/event')
+                            .send(newEvent);
+                })
+                .then(result => {
+                    const { body: event } = result;
+                    eventId = event._id;
+                    newPost.eventId = eventId;
+
+                    return groupsService()
+                            .post('/post')
+                            .send(newPost);
+                })
+                .then(result => {
+                    const { body: post } = result;
+                    expect(result.status).to.be.eql(201);
+                    expect(post.owner).to.be.eql(memberId);
+                    expect(post.group).to.be.eql(groupId);
+                    expect(post.event).to.be.eql(eventId);
+                    done();
+                });
+
+        });
     })
 })
