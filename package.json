@@ -6,7 +6,8 @@
   "scripts": {
     "preservice": "npm run test",
     "service": "NODE_ENV=dev node ./service/service.js | ./node_modules/.bin/bunyan",
-    "test": "NODE_ENV=test mocha --recursive"
+    "test": "NODE_ENV=test mocha --recursive",
+    "start-test-mongo": "/usr/bin/mongod --dbpath=data/db"
   },
   "repository": {
     "type": "git",

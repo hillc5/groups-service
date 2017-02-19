@@ -1,6 +1,6 @@
 const mongoose = require('mongoose'),
       { Member } = require('../../service/models/Model'),
-      { clearSavedTestData, groupsService, saveTestMember, saveTestGroup, testMemberData } = require('../util/test-helpers'),
+      { clearSavedTestData, groupsService, saveTestMember, saveTestGroup, testGroupData, testMemberData } = require('../util/test-helpers'),
 
       chai = require('chai'),
 
@@ -900,6 +900,46 @@ describe('member-api integration tests', () => {
                     expect()
                     done();
                 });
+        });
+
+
+        it('should return the group name', done => {
+            const newPost = {
+                      name: 'Test Post',
+                      text: 'This is a test post',
+
+                  };
+
+            let memberId, groupId, memberName, memberEmail;
+
+            saveTestGroup()
+                .then(group => {
+                    const { owner, _id } = group
+                    memberId = owner,
+                    groupId = _id;
+
+                    newPost.memberId = memberId;
+                    newPost.groupId = groupId;
+
+                    return groupsService()
+                            .post('/post')
+                            .send(newPost);
+                })
+                .then(result => {
+                    return groupsService()
+                            .get(`/member/${memberId}/posts`);
+                })
+                .then(result => {
+                    const { body: posts } = result,
+                          [ post ] = posts,
+                          { _id, name } = post.group;
+
+                    expect(result.status).to.be.eql(200);
+                    expect(_id).to.be.eql(groupId);
+                    expect(name).to.be.eql(testGroupData.name);
+                    expect()
+                    done();
+                });
         })
-    })
+    });
 });
