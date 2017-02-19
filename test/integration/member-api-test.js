@@ -396,7 +396,7 @@ describe('member-api integration tests', () => {
                     const { body: events } = result,
                           [ event ] = events;
 
-                    expect(event.creator._id).to.be.eql(memberId);
+                    expect(event.owner._id).to.be.eql(memberId);
                     done();
                 });
         });
@@ -520,13 +520,13 @@ describe('member-api integration tests', () => {
                     const { body: events } = result,
                           [ eventOne, eventTwo ] = events;
 
-                    expect(eventOne.creator._id).to.be.eql(memberId);
-                    expect(eventTwo.creator._id).to.be.eql(memberId);
+                    expect(eventOne.owner._id).to.be.eql(memberId);
+                    expect(eventTwo.owner._id).to.be.eql(memberId);
                     done();
                 });
         });
 
-        it('should return the name email and joinDate for the creator', done => {
+        it('should return the name email and joinDate for the owner', done => {
             const newTestGroup = {
                 name: 'Test Group',
                 isPublic: true
@@ -564,12 +564,12 @@ describe('member-api integration tests', () => {
                 .then(result => {
                     const { body: events } = result,
                           [ event ] = events,
-                          { creator } = event;
+                          { owner } = event;
 
-                    expect(event.creator._id).to.be.eql(memberId);
-                    expect(creator.name).to.not.be.undefined;
-                    expect(creator.email).to.not.be.undefined;
-                    expect(creator.joinDate).to.not.be.undefined;
+                    expect(owner._id).to.be.eql(memberId);
+                    expect(owner.name).to.not.be.undefined;
+                    expect(owner.email).to.not.be.undefined;
+                    expect(owner.joinDate).to.not.be.undefined;
                     done();
                 });
         });
@@ -631,8 +631,7 @@ describe('member-api integration tests', () => {
                     expect(invitedMember.email).to.not.be.undefined;
                     expect(invitedMember.joinDate).to.not.be.undefined;
                     done();
-                })
-                .catch(err => console.log(err));
+                });
         });
 
         it('should return the name, and tags for the events group', done => {

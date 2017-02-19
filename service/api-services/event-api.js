@@ -11,13 +11,13 @@ function createEvent(req, res) {
                   newEvent = {
                       name,
                       group: groupId,
-                      creator: memberId,
+                      owner: memberId,
                       startDate: new Date(startDate),
                       endDate: new Date(endDate),
                       invitees: invitees.map(invitee => invitee.trim())
                   };
-            // Add creator to invitees list
-            newEvent.invitees.unshift(newEvent.creator);
+            // Add owner to invitees list
+            newEvent.invitees.unshift(newEvent.owner);
             return eventData.saveEvent(newEvent);
         })
         .then(result => {
@@ -39,8 +39,8 @@ function getEventById(req, res) {
                      path: 'group',
                      select: 'name _id'
                   },
-                  creatorOptions = {
-                     path: 'creator',
+                  ownerOptions = {
+                     path: 'owner',
                      select: 'name email joinDate'
                   },
                   inviteesOptions = {
@@ -59,7 +59,7 @@ function getEventById(req, res) {
                         select: 'title text owner replies postDate'
                      }
                   },
-                  refOptions = [ groupOptions, creatorOptions, inviteesOptions, attendeesOptions, postOptions ];
+                  refOptions = [ groupOptions, ownerOptions, inviteesOptions, attendeesOptions, postOptions ];
 
             return eventData.findEvent(query, fields, refOptions);
         })

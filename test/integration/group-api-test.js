@@ -654,9 +654,9 @@ describe('group-api integration tests', () => {
                     expect(events.length).to.be.eql(2);
                     const [ savedEventOne, savedEventTwo ] = events;
                     expect(savedEventOne.name).to.be.eql(newEventOne.name);
-                    expect(savedEventOne.creator.name).to.be.eql(memberOne.name);
+                    expect(savedEventOne.owner.name).to.be.eql(memberOne.name);
                     expect(savedEventTwo.name).to.be.eql(newEventTwo.name);
-                    expect(savedEventTwo.creator.name).to.be.eql(memberTwo.name);
+                    expect(savedEventTwo.owner.name).to.be.eql(memberTwo.name);
                     done();
                 });
         });

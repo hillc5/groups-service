@@ -252,7 +252,7 @@ describe('event-api integration tests', () => {
                     const { body: event } = result;
                     expect(result.status).to.be.eql(201);
                     expect(event.group).to.be.eql(groupId);
-                    expect(event.creator).to.be.eql(memberId);
+                    expect(event.owner).to.be.eql(memberId);
                     done();
                 });
         });
@@ -285,7 +285,7 @@ describe('event-api integration tests', () => {
                     expect(new Date(event.startDate)).to.be.an.instanceOf(Date);
                     expect(event.endDate).to.be.a('string');
                     expect(new Date(event.endDate)).to.be.an.instanceOf(Date);
-                    expect(mongoose.mongo.ObjectId(event.creator)).to.be.an.instanceOf(mongoose.mongo.ObjectId);
+                    expect(mongoose.mongo.ObjectId(event.owner)).to.be.an.instanceOf(mongoose.mongo.ObjectId);
                     expect(mongoose.mongo.ObjectId(event.group)).to.be.an.instanceOf(mongoose.mongo.ObjectId);
                     expect(event.invitees).to.be.an('array');
                     expect(event.invitees.length).to.be.eql(1);
@@ -319,7 +319,7 @@ describe('event-api integration tests', () => {
                     const { body: event } = result;
                     expect(result.status).to.be.eql(201);
                     expect(event.group).to.be.eql(groupId);
-                    expect(event.creator).to.be.eql(memberId);
+                    expect(event.owner).to.be.eql(memberId);
                     expect(event.invitees).to.include(memberId);
                     done();
                 });
@@ -518,11 +518,11 @@ describe('event-api integration tests', () => {
                 })
                 .then(result => {
                     const { body: event } = result;
-                    expect(event.creator).to.not.be.undefined;
-                    expect(event.creator.name).to.be.eql(savedMember.name);
-                    expect(event.creator.email).to.be.eql(savedMember.email);
+                    expect(event.owner).to.not.be.undefined;
+                    expect(event.owner.name).to.be.eql(savedMember.name);
+                    expect(event.owner.email).to.be.eql(savedMember.email);
                     expect(event._id).to.not.be.undefined;
-                    expect(new Date(event.creator.joinDate)).to.be.eql(new Date(savedMember.joinDate));
+                    expect(new Date(event.owner.joinDate)).to.be.eql(new Date(savedMember.joinDate));
                     done();
                 });
         });
@@ -578,7 +578,7 @@ describe('event-api integration tests', () => {
 
                     expect(event.invitees).to.not.be.undefined;
 
-                    const [ creator, invitee ] = event.invitees;
+                    const [ owner, invitee ] = event.invitees;
 
                     expect(invitee.name).to.be.eql(newMember.name);
                     expect(invitee.email).to.be.eql(newMember.email);

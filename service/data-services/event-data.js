@@ -5,9 +5,9 @@ const { Event, Member, Group } = require('../models/Model'),
       DATA_NAME = 'MEMBER_DATA';
 
 function saveEvent(eventData) {
-    const { creator, group, invitees } = eventData,
+    const { owner, group, invitees } = eventData,
           entities = [
-              { type: 'member', id: creator },
+              { type: 'member', id: owner },
               { type: 'group', id: group }
           ];
 

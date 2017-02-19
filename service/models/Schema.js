@@ -21,7 +21,7 @@ const PostSchema = Schema({
 const EventSchema = Schema({
     name: { type: String, required: true },
     group: { type: ObjectId, ref: 'Group', required: true },
-    creator: { type: ObjectId, ref: 'Member', required: true },
+    owner: { type: ObjectId, ref: 'Member', required: true },
     invitees: [ { type: ObjectId, ref: 'Member' } ],
     attendees: [ { type: ObjectId, ref: 'Member' } ],
     startDate: { type: Date, required: true },

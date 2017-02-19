@@ -108,8 +108,8 @@ function getAllGroupEvents (req, res) {
                      path: 'group',
                      select: 'name _id tags'
                   },
-                  creatorOptions = {
-                     path: 'creator',
+                  ownerOptions = {
+                     path: 'owner',
                      select: 'name email joinDate'
                   },
                   inviteesOptions = {
@@ -128,7 +128,7 @@ function getAllGroupEvents (req, res) {
                         select: 'title text owner replies postDate'
                      }
                   },
-                  refOptions = [ groupOptions, creatorOptions, inviteesOptions, attendeesOptions, postOptions ];
+                  refOptions = [ groupOptions, ownerOptions, inviteesOptions, attendeesOptions, postOptions ];
 
             return eventData.findEvents(query, fields, refOptions);
         })
