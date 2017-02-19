@@ -17,7 +17,7 @@ describe('group-api integration tests', () => {
         it('should return 400 for incorrect owner id', done => {
             const newGroup = {
                       name: 'Test',
-                      owner: 'wrongId',
+                      memberId: 'wrongId',
                       isPublic: true
                   };
 
@@ -33,7 +33,7 @@ describe('group-api integration tests', () => {
                     const [ error ] = JSON.parse(err.response.text);
                     expect(err.status).to.be.eql(400);
                     expect(error.parameter).to.not.be.undefined;
-                    expect(error.parameter).to.be.eql('owner');
+                    expect(error.parameter).to.be.eql('memberId');
                     done();
                 });
         });
@@ -41,7 +41,7 @@ describe('group-api integration tests', () => {
         it('should return 400 if a name is not supplied', done => {
             const newGroup = {
                       name: '',
-                      owner: '585d851c1b865511bb0543d2',
+                      memberId: '585d851c1b865511bb0543d2',
                       isPublic: true
                   };
 
@@ -65,7 +65,7 @@ describe('group-api integration tests', () => {
         it('should return 400 if a isPublic is not supplied', done => {
             const newGroup = {
                       name: 'Test',
-                      owner: '585d851c1b865511bb0543d2'
+                      memberId: '585d851c1b865511bb0543d2'
                   };
 
             groupsService()
@@ -87,7 +87,7 @@ describe('group-api integration tests', () => {
 
         it('should return 404 if there is no member for the given owner', done => {
             const newGroup = {
-                    owner: '585d851c1b865511bb0543d2',
+                    memberId: '585d851c1b865511bb0543d2',
                     name: 'Test',
                     isPublic: true
                   };
@@ -115,7 +115,7 @@ describe('group-api integration tests', () => {
 
             saveTestMember()
                 .then(member => {
-                    newGroup.owner = member._id;
+                    newGroup.memberId = member._id;
                     return groupsService()
                         .post('/group')
                         .send(newGroup)
@@ -134,7 +134,7 @@ describe('group-api integration tests', () => {
 
             saveTestMember()
                 .then(member => {
-                    newGroup.owner = member._id;
+                    newGroup.memberId = member._id;
                     return groupsService()
                             .post('/group')
                             .send(newGroup);
@@ -143,7 +143,7 @@ describe('group-api integration tests', () => {
                     const { owner, members } = res.body,
                           member = members[0];
 
-                    expect(member).to.be.eql(newGroup.owner);
+                    expect(member).to.be.eql(newGroup.memberId);
                     done();
                 })
         })
@@ -151,13 +151,13 @@ describe('group-api integration tests', () => {
         it('should return the full group on successful creation', done => {
             const newGroup = {
                       name: 'Test',
-                      owner: '585d851c1b865511bb0543d2',
+                      memberId: '585d851c1b865511bb0543d2',
                       isPublic: true
                   };
 
             saveTestMember()
                 .then(member => {
-                    newGroup.owner = member._id;
+                    newGroup.memberId = member._id;
                     return groupsService()
                         .post('/group')
                         .send(newGroup);
@@ -168,7 +168,7 @@ describe('group-api integration tests', () => {
                     expect(_id).to.not.be.undefined;
                     expect(__v).to.be.eql(0);
                     expect(name).to.be.eql(newGroup.name);
-                    expect(owner).to.be.eql(newGroup.owner);
+                    expect(owner).to.be.eql(newGroup.memberId);
                     expect(isPublic).to.be.eql(newGroup.isPublic);
                     expect(description).to.be.a('string');
                     expect(members).to.be.an('array');
@@ -190,7 +190,7 @@ describe('group-api integration tests', () => {
 
             saveTestMember()
                 .then(member => {
-                    newGroup.owner = member._id;
+                    newGroup.memberId = member._id;
                     return groupsService()
                         .post('/group')
                         .send(newGroup)
@@ -212,7 +212,7 @@ describe('group-api integration tests', () => {
 
             saveTestMember()
                 .then(member => {
-                    newGroup.owner = member._id;
+                    newGroup.memberId = member._id;
                     return groupsService()
                         .post('/group')
                         .send(newGroup)
@@ -386,7 +386,7 @@ describe('group-api integration tests', () => {
                   }
             saveTestMember()
                 .then(member => {
-                    groupData.owner = member._id;
+                    groupData.memberId = member._id;
                     return groupsService()
                             .post('/group')
                             .send(groupData);
@@ -409,7 +409,7 @@ describe('group-api integration tests', () => {
                   }
             saveTestMember()
                 .then(member => {
-                    groupData.owner = member._id
+                    groupData.memberId = member._id
                     return groupsService()
                             .post('/group')
                             .send(groupData);
@@ -435,7 +435,7 @@ describe('group-api integration tests', () => {
 
             saveTestMember()
                 .then(member => {
-                    groupData.owner = member._id;
+                    groupData.memberId = member._id;
                     return groupsService()
                             .post('/group')
                             .send(groupData);
@@ -611,7 +611,7 @@ describe('group-api integration tests', () => {
                 .send(newMemberOne)
                 .then(result => {
                     memberOne = result.body;
-                    newGroup.owner = memberOne._id;
+                    newGroup.memberId = memberOne._id;
                     newEventOne.memberId = memberOne._id;
                     return groupsService()
                             .post('/group')
@@ -707,8 +707,8 @@ describe('group-api integration tests', () => {
 
             saveTestMember()
                 .then(member => {
-                    groupOneData.owner = member._id;
-                    groupTwoData.owner = member._id;
+                    groupOneData.memberId = member._id;
+                    groupTwoData.memberId = member._id;
                     return groupsService()
                             .post('/group')
                             .send(groupOneData);
@@ -744,8 +744,8 @@ describe('group-api integration tests', () => {
 
             saveTestMember()
                 .then(member => {
-                    groupOneData.owner = member._id;
-                    groupTwoData.owner = member._id;
+                    groupOneData.memberId = member._id;
+                    groupTwoData.memberId = member._id;
                     return groupsService()
                             .post('/group')
                             .send(groupOneData);
@@ -786,9 +786,9 @@ describe('group-api integration tests', () => {
 
             saveTestMember()
                 .then(member => {
-                    groupOneData.owner = member._id;
-                    groupTwoData.owner = member._id;
-                    groupThreeData.owner = member._id;
+                    groupOneData.memberId = member._id;
+                    groupTwoData.memberId = member._id;
+                    groupThreeData.memberId = member._id;
                     return groupsService()
                             .post('/group')
                             .send(groupOneData);
@@ -834,9 +834,9 @@ describe('group-api integration tests', () => {
 
             saveTestMember()
                 .then(member => {
-                    groupOneData.owner = member._id;
-                    groupTwoData.owner = member._id;
-                    groupThreeData.owner = member._id;
+                    groupOneData.memberId = member._id;
+                    groupTwoData.memberId = member._id;
+                    groupThreeData.memberId = member._id;
                     return groupsService()
                             .post('/group')
                             .send(groupOneData);

@@ -48,10 +48,11 @@ function saveTestGroup() {
             .post('/member')
             .send(memberData)
             .then(result => {
-                let groupData = Object.assign({ owner: result.body._id }, testGroupData);
+                const { _id: memberId } = result.body;
+                testGroupData.memberId = memberId;
                 return groupsService()
                         .post('/group')
-                        .send(groupData);
+                        .send(testGroupData);
             })
             .then(result => {
                 return result.body;

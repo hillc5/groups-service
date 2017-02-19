@@ -5,18 +5,18 @@ const groupData = require('../data-services/group-data'),
       handleError = require('./util/api-error-handler');
 
 function createGroup(req, res) {
-    const bodyOptions = [ 'owner', 'name', 'isPublic' ];
+    const bodyOptions = [ 'memberId', 'name', 'isPublic' ];
 
     validateRequest({ req, bodyOptions })
         .then(() => {
-            const { owner, name, description='', tags='', isPublic } = req.body,
+            const { memberId, name, description='', tags='', isPublic } = req.body,
 
                   newGroup = {
                       name,
                       description,
-                      owner,
+                      owner: memberId,
                       isPublic,
-                      members: [ owner ],
+                      members: [ memberId ],
                       tags: tags.split(',').filter(item => item).map(tag => tag.trim()),
                       creationDate: Date.now()
                   };

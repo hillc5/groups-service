@@ -49,7 +49,6 @@ const sharedMappings = {
 };
 
 const validationMap = {
-    owner: sharedMappings.id('owner'),
     groupId: sharedMappings.id('groupId'),
     memberId: sharedMappings.id('memberId'),
     eventId: sharedMappings.id('eventId'),

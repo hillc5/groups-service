@@ -222,7 +222,7 @@ describe('member-api integration tests', () => {
 
             saveTestMember()
                 .then(member => {
-                    groupData.owner = member._id;
+                    groupData.memberId = member._id;
                     return groupsService()
                             .post('/group')
                             .send(groupData);
@@ -234,7 +234,7 @@ describe('member-api integration tests', () => {
                 })
                 .then(result => {
                     return groupsService()
-                            .get(`/member/${groupData.owner}/groups`);
+                            .get(`/member/${groupData.memberId}/groups`);
                 })
                 .then(result => {
                     const groups = result.body;
@@ -268,8 +268,8 @@ describe('member-api integration tests', () => {
                             .send(ownerData);
                 })
                 .then(result => {
-                    groupOneData.owner = result.body._id;
-                    groupTwoData.owner = result.body._id;
+                    groupOneData.memberId = result.body._id;
+                    groupTwoData.memberId = result.body._id;
                     return groupsService()
                             .post('/group')
                             .send(groupOneData);
@@ -373,7 +373,7 @@ describe('member-api integration tests', () => {
             saveTestMember()
                 .then(member => {
                     memberId = member._id;
-                    newTestGroup.owner = memberId;
+                    newTestGroup.memberId = memberId;
 
                     return groupsService()
                             .post('/group')
@@ -421,7 +421,7 @@ describe('member-api integration tests', () => {
             saveTestMember()
                 .then(member => {
                     ownerId = member._id;
-                    newTestGroup.owner = ownerId;
+                    newTestGroup.memberId = ownerId;
 
                     return groupsService()
                             .post('/group')
@@ -483,8 +483,8 @@ describe('member-api integration tests', () => {
             saveTestMember()
                 .then(member => {
                     memberId = member._id;
-                    testGroupOne.owner = memberId;
-                    testGroupTwo.owner = memberId;
+                    testGroupOne.memberId = memberId;
+                    testGroupTwo.memberId = memberId;
                     testEventOne.memberId = memberId;
                     testEventTwo.memberId = memberId;
 
@@ -542,7 +542,7 @@ describe('member-api integration tests', () => {
             saveTestMember()
                 .then(member => {
                     memberId = member._id;
-                    newTestGroup.owner = memberId;
+                    newTestGroup.memberId = memberId;
 
                     return groupsService()
                             .post('/group')
@@ -594,7 +594,7 @@ describe('member-api integration tests', () => {
             saveTestMember()
                 .then(member => {
                     ownerId = member._id;
-                    newTestGroup.owner = ownerId;
+                    newTestGroup.memberId = ownerId;
 
                     return groupsService()
                             .post('/group')
@@ -650,7 +650,7 @@ describe('member-api integration tests', () => {
             saveTestMember()
                 .then(member => {
                     memberId = member._id;
-                    newTestGroup.owner = memberId;
+                    newTestGroup.memberId = memberId;
 
                     return groupsService()
                             .post('/group')

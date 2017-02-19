@@ -415,7 +415,7 @@ describe('event-api integration tests', () => {
             saveTestMember()
                 .then(member => {
                     memberId = member._id;
-                    newGroup.owner = memberId;
+                    newGroup.memberId = memberId;
                     newEvent.memberId = memberId;
                     return groupsService()
                             .post('/group')
@@ -455,7 +455,7 @@ describe('event-api integration tests', () => {
             saveTestMember()
                 .then(member => {
                     memberId = member._id;
-                    newGroup.owner = memberId;
+                    newGroup.memberId = memberId;
                     newEvent.memberId = memberId;
                     return groupsService()
                             .post('/group')
@@ -498,7 +498,7 @@ describe('event-api integration tests', () => {
             saveTestMember()
                 .then(member => {
                     savedMember = member;
-                    newGroup.owner = savedMember._id;
+                    newGroup.memberId = savedMember._id;
                     newEvent.memberId = savedMember._id;
                     return groupsService()
                             .post('/group')
@@ -547,7 +547,7 @@ describe('event-api integration tests', () => {
             saveTestMember()
                 .then(member => {
                     savedMember = member;
-                    newGroup.owner = savedMember._id;
+                    newGroup.memberId = savedMember._id;
                     newEvent.memberId = savedMember._id;
                     return groupsService()
                             .post('/group')
