@@ -65,7 +65,7 @@ function findGroupById(req, res) {
                       path: 'events',
                       select: 'name invitees attendees startDate endDate',
                       populate: {
-                          path: 'creator',
+                          path: 'owner',
                           select: 'name'
                       }
                   },

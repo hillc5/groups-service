@@ -73,7 +73,7 @@ function getAllMemberEvents(req, res) {
                   query = {
                       $or:
                           [
-                              { creator: memberId },
+                              { owner: memberId },
                               { invitees: memberId },
                               { attendees: memberId }
                           ]

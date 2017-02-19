@@ -137,7 +137,7 @@ describe('event-api integration tests', () => {
                 });
         });
 
-        it('should return 404 if member does not exist for given creator id', done => {
+        it('should return 404 if member does not exist for given owner id', done => {
             const newEvent = {
                       name: 'Test Event',
                       startDate: new Date(),
@@ -295,7 +295,7 @@ describe('event-api integration tests', () => {
                 });
         });
 
-        it('should add the creator to the invitees array on creation', done => {
+        it('should add the owner to the invitees array on creation', done => {
                   const newEvent = {
                       name: 'Test Event',
                       startDate: new Date(),
@@ -482,7 +482,7 @@ describe('event-api integration tests', () => {
                 });
         });
 
-        it('should return name, email, and joinDate for the events creator', done => {
+        it('should return name, email, and joinDate for the events owner', done => {
             const newGroup = {
                       name: 'Test Group',
                       isPublic: true
@@ -793,7 +793,7 @@ describe('event-api integration tests', () => {
                 })
                 .then(result => {
                     const { body: event } = result;
-                    // length === 3 because the creator is added to the invitees array
+                    // length === 3 because the owner is added to the invitees array
                     expect(event.invitees.length).to.be.eql(3);
                     expect(event.invitees).to.include(newEvent.memberId);
                     expect(event.invitees).to.include(memberToAddId);
@@ -835,7 +835,7 @@ describe('event-api integration tests', () => {
                 })
                 .then(result => {
                     const { body: event } = result;
-                    // 2 because creator is added to the invitees array
+                    // 2 because owner is added to the invitees array
                     expect(event.invitees.length).to.be.eql(2);
                     expect(event.invitees).to.include(memberToAddId);
                     done();

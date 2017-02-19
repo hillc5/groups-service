@@ -416,12 +416,12 @@ describe('member-api integration tests', () => {
                       email: 'Test@TestMmember.com'
                   };
 
-            let creatorId, memberId, groupId;
+            let ownerId, memberId, groupId;
 
             saveTestMember()
                 .then(member => {
-                    creatorId = member._id;
-                    newTestGroup.owner = creatorId;
+                    ownerId = member._id;
+                    newTestGroup.owner = ownerId;
 
                     return groupsService()
                             .post('/group')
@@ -436,7 +436,7 @@ describe('member-api integration tests', () => {
                 })
                 .then(result => {
                     memberId = result.body._id
-                    newTestEvent.memberId = creatorId;
+                    newTestEvent.memberId = ownerId;
                     newTestEvent.groupId = groupId;
                     newTestEvent.invitees = [ memberId ];
                     return groupsService()
@@ -451,7 +451,7 @@ describe('member-api integration tests', () => {
                     const { body: events } = result,
                           [ event ] = events,
                           { invitees } = event,
-                          [ creator, invitedMember ] = invitees;
+                          [ owner, invitedMember ] = invitees;
 
                     expect(invitedMember._id).to.be.eql(memberId);
                     done();
@@ -589,12 +589,12 @@ describe('member-api integration tests', () => {
                 email: 'Test@TestMmember.com'
             };
 
-            let creatorId, memberId, groupId;
+            let ownerId, memberId, groupId;
 
             saveTestMember()
                 .then(member => {
-                    creatorId = member._id;
-                    newTestGroup.owner = creatorId;
+                    ownerId = member._id;
+                    newTestGroup.owner = ownerId;
 
                     return groupsService()
                             .post('/group')
@@ -609,7 +609,7 @@ describe('member-api integration tests', () => {
                 })
                 .then(result => {
                     memberId = result.body._id
-                    newTestEvent.memberId = creatorId;
+                    newTestEvent.memberId = ownerId;
                     newTestEvent.groupId = groupId;
                     newTestEvent.invitees = [ memberId ];
                     return groupsService()
@@ -624,7 +624,7 @@ describe('member-api integration tests', () => {
                     const { body: events } = result,
                           [ event ] = events,
                           { invitees } = event,
-                          [ creator, invitedMember ] = invitees;
+                          [ owner, invitedMember ] = invitees;
 
                     expect(invitedMember._id).to.be.eql(memberId);
                     expect(invitedMember.name).to.not.be.undefined;
