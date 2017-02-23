@@ -1,5 +1,6 @@
 const groupData = require('../data-services/group-data'),
       eventData = require('../data-services/event-data'),
+      postData = require('../data-services/post-data'),
       mongoose = require('mongoose'),
       validateRequest = require('./util/api-validation'),
       handleError = require('./util/api-error-handler');
@@ -96,7 +97,7 @@ function findGroupById(req, res) {
         .catch(handleError(res));
 }
 
-function getAllGroupEvents (req, res) {
+function getAllGroupEvents(req, res) {
     const paramOptions = [ 'groupId' ];
 
     validateRequest({ req, paramOptions })
@@ -138,6 +139,38 @@ function getAllGroupEvents (req, res) {
         .catch(handleError(res));
 }
 
+function getAllGroupPosts(req, res) {
+    const paramOptions = [ 'groupId' ];
+
+    validateRequest({ req, paramOptions })
+        .then(() => {
+            const { groupId } = req.params,
+                  query = { group: groupId },
+                  fields = '-__v',
+                  ownerOptions = {
+                      path: 'owner',
+                      select: 'name email'
+                  },
+                  groupOptions = {
+                      path: 'group',
+                      select: 'name'
+                  },
+                  eventOptions = {
+                      path: 'event',
+                      select: 'name'
+                  },
+                  refOptions = [ ownerOptions, groupOptions, eventOptions ];
+
+            return postData.findPosts(query, fields, refOptions);
+        })
+        .then((result=[]) => {
+            res.status(200).send(result);
+        })
+        .catch(handleError(res));
+
+
+}
+
 function findGroupsByTags(req, res) {
     const { tags=[] } = req.query,
           query = { tags: { $in : Array.isArray(tags) ? tags : [ tags ] }, isPublic: true },
@@ -177,5 +210,6 @@ module.exports = {
     addMemberToGroup,
     findGroupById,
     getAllGroupEvents,
+    getAllGroupPosts,
     findGroupsByTags
 };
