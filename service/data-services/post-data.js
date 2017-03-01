@@ -33,7 +33,24 @@ function findPosts(query={}, fields='', refOptions=[]) {
     return postQuery.exec();
 }
 
+function addReplyToPost(postId, replyId) {
+    const entities = [
+        { type: 'post', id: postId },
+        { type: 'post', id: replyId }
+    ];
+
+    return verifyEntitiesExist(entities)
+            .then(() => {
+                const query = { _id: postId },
+                      update = { $addToSet: { replies: replyId }},
+                      options = { new: true };
+
+                return Post.findOneAndUpdate(query, update, options).exec();
+            });
+}
+
 module.exports = {
     savePost,
-    findPosts
-}
+    findPosts,
+    addReplyToPost
+};

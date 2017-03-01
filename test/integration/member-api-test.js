@@ -756,6 +756,8 @@ describe('member-api integration tests', () => {
                       text: 'Two'
                   };
 
+            let memberId, groupId;
+
             saveTestGroup()
                 .then(group => {
                     memberId = group.owner,

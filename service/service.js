@@ -54,6 +54,7 @@ function startService() {
 
     // Post API
     app.post('/post', postAPI.createPost);
+    app.post('/post/:postId/reply', postAPI.addReply);
 
     app.listen(9000);
     logger.info('Now listening on port 9000');

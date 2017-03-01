@@ -52,6 +52,7 @@ const validationMap = {
     groupId: sharedMappings.id('groupId'),
     memberId: sharedMappings.id('memberId'),
     eventId: sharedMappings.id('eventId'),
+    postId: sharedMappings.id('postId'),
     startDate: sharedMappings.date('startDate'),
     endDate: sharedMappings.date('endDate'),
     text: {

@@ -3,7 +3,8 @@ const { Group, Member, Event, Post } = require('../../models/Model');
 const entityMap = {
     'group': Group,
     'member': Member,
-    'event': Event
+    'event': Event,
+    'post': Post
 }
 
 /**
