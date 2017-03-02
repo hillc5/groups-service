@@ -327,7 +327,7 @@ describe('post-api integration tests', () => {
         });
     });
 
-    describe('#addReply', () => {
+    describe('#createAndAddReply', () => {
         it('should return 400 if the reply name is missing', done => {
             const newPost = {
                       name: 'Test Post',

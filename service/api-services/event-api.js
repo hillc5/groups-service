@@ -1,4 +1,5 @@
 const eventData = require('../data-services/event-data'),
+      postData = require('../data-services/post-data'),
       validateRequest = require('./util/api-validation'),
       handleError = require('./util/api-error-handler');
 
@@ -73,6 +74,28 @@ function getEventById(req, res) {
         .catch(handleError(res));
 }
 
+function getAllEventPosts(req, res) {
+    const paramOptions = [ 'eventId' ];
+
+    validateRequest({ req, paramOptions })
+        .then(() => {
+            const { eventId } = req.params,
+                  query = { event: eventId },
+                  fields = '-__v',
+                  ownerOptions = {
+                      path: 'owner',
+                      select: 'name email'
+                  },
+                  refOptions = [ ownerOptions ];
+
+            return postData.findPosts(query, fields, refOptions);
+        })
+        .then((result=[]) => {
+            res.status(200).send(result);
+        })
+        .catch(handleError(res));
+}
+
 function memberInvite(req, res) {
     const paramOptions = [ 'eventId' ],
           bodyOptions = [ 'memberId' ];
@@ -119,6 +142,7 @@ function memberAttend(req, res) {
 module.exports = {
     createEvent,
     getEventById,
+    getAllEventPosts,
     memberInvite,
     memberAttend
 };

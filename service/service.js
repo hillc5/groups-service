@@ -49,12 +49,13 @@ function startService() {
     // Event API
     app.post('/event', eventAPI.createEvent);
     app.get('/event/:eventId', eventAPI.getEventById);
+    app.get('/event/:eventId/posts', eventAPI.getAllEventPosts);
     app.post('/event/:eventId/invite', eventAPI.memberInvite);
     app.post('/event/:eventId/attend', eventAPI.memberAttend);
 
     // Post API
     app.post('/post', postAPI.createPost);
-    app.post('/post/:postId/reply', postAPI.addReply);
+    app.post('/post/:postId/reply', postAPI.createAndAddReply);
 
     app.listen(9000);
     logger.info('Now listening on port 9000');

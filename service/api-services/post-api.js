@@ -32,7 +32,7 @@ function createPost(req, res) {
         .catch(handleError(res));
 }
 
-function addReply(req, res) {
+function createAndAddReply(req, res) {
     const paramOptions = [ 'postId' ],
           bodyOptions = [ 'name', 'text', 'memberId', 'groupId', 'eventId' ];
 
@@ -73,5 +73,5 @@ function addReply(req, res) {
 
 module.exports = {
     createPost,
-    addReply
+    createAndAddReply
 };
