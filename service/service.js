@@ -51,7 +51,7 @@ function startService() {
     app.get('/event/:eventId', eventAPI.getEventById);
     app.get('/event/:eventId/posts', eventAPI.getAllEventPosts);
     app.put('/event/:eventId/invite', eventAPI.memberInvite);
-    app.post('/event/:eventId/attend', eventAPI.memberAttend);
+    app.put('/event/:eventId/attend', eventAPI.memberAttend);
 
     // Post API
     app.post('/post', postAPI.createPost);

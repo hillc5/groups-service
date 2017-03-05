@@ -849,7 +849,7 @@ describe('event-api integration tests', () => {
             saveTestMember()
                 .then(member => {
                     return groupsService()
-                            .post('/event/wrongId/attend')
+                            .put('/event/wrongId/attend')
                             .send({ memberId: member._id });
                 })
                 .then(result => {
@@ -884,7 +884,7 @@ describe('event-api integration tests', () => {
                 .then(result => {
                     const { body: event } = result;
                     return groupsService()
-                            .post(`/event/${event._id}/attend`)
+                            .put(`/event/${event._id}/attend`)
                             .send({ memberId: 'wrongId' });
                 })
                 .then(result => {
@@ -908,7 +908,7 @@ describe('event-api integration tests', () => {
                 .then(group => {
                     badEventId = group._id;
                     return groupsService()
-                            .post(`/event/${badEventId}/attend`)
+                            .put(`/event/${badEventId}/attend`)
                             .send({ memberId: group.owner });
                 })
                 .then(result => {
@@ -949,7 +949,7 @@ describe('event-api integration tests', () => {
                 .then(result => {
                     eventId = result.body._id;
                     return groupsService()
-                            .post(`/event/${eventId}/attend`)
+                            .put(`/event/${eventId}/attend`)
                             .send({ memberId: badMemberId });
                 })
                 .then(result => {
@@ -989,7 +989,7 @@ describe('event-api integration tests', () => {
                 .then(result => {
                     eventId = result.body._id;
                     return groupsService()
-                            .post(`/event/${eventId}/attend`)
+                            .put(`/event/${eventId}/attend`)
                             .send({ memberId: memberToInviteId });
                 })
                 .then(result => {
@@ -1029,7 +1029,7 @@ describe('event-api integration tests', () => {
                 .then(result => {
                     eventId = result.body._id;
                     return groupsService()
-                            .post(`/event/${eventId}/attend`)
+                            .put(`/event/${eventId}/attend`)
                             .send({ memberId: memberToInviteId });
                 })
                 .then(result => {
@@ -1063,7 +1063,7 @@ describe('event-api integration tests', () => {
                 .then(result => {
                     eventId = result.body._id;
                     return groupsService()
-                            .post(`/event/${eventId}/attend`)
+                            .put(`/event/${eventId}/attend`)
                             .send({ memberId: memberToAttendId });
                 })
                 .then(result => {
