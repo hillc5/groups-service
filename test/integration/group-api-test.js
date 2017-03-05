@@ -232,7 +232,7 @@ describe('group-api integration tests', () => {
     describe('#addMemberToGroup', () => {
         it('should return 400 for incorrect format for groupId', done => {
             groupsService()
-                .post(`/group/wrongId/member`)
+                .put(`/group/wrongId/member`)
                 .then(result => {
                     // Fail if we hit this spot
                     expect(false).to.be.true;
@@ -249,7 +249,7 @@ describe('group-api integration tests', () => {
 
         it('should return 400 for incorrect format for memberId', done => {
             groupsService()
-                .post(`/group/585d851c1b865511bb0543d2/member`)
+                .put(`/group/585d851c1b865511bb0543d2/member`)
                 .send({ memberId: 'wrongId' })
                 .then(result => {
                     // Fail if we hit this spot
@@ -270,7 +270,7 @@ describe('group-api integration tests', () => {
             saveTestMember()
                 .then(member => {
                     return groupsService()
-                        .post('/group/585d85e81b865511bb0543d5/member')
+                        .put('/group/585d85e81b865511bb0543d5/member')
                         .send({ memberId: member._id })
                 })
                 .then(() => {
@@ -288,7 +288,7 @@ describe('group-api integration tests', () => {
             saveTestGroup()
                 .then(group => {
                     return groupsService()
-                            .post(`/group/${group._id}/member`)
+                            .put(`/group/${group._id}/member`)
                             .send({ memberId: '585d851c1b865511bb0543d2'});
                 })
                 .then(() => {
@@ -314,7 +314,7 @@ describe('group-api integration tests', () => {
                 })
                 .then(group => {
                     return groupsService()
-                            .post(`/group/${group._id}/member`)
+                            .put(`/group/${group._id}/member`)
                             .send({ memberId });
                 })
                 .then(result => {
@@ -333,7 +333,7 @@ describe('group-api integration tests', () => {
                 })
                 .then(group => {
                     return groupsService()
-                            .post(`/group/${group._id}/member`)
+                            .put(`/group/${group._id}/member`)
                             .send({ memberId });
                 })
                 .then(result => {
@@ -637,7 +637,7 @@ describe('group-api integration tests', () => {
                         memberId: memberTwo._id
                     };
                     return groupsService()
-                            .post(`/group/${groupId}/member`)
+                            .put(`/group/${groupId}/member`)
                             .send(member);
                 })
                 .then(() => {

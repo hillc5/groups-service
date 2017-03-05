@@ -277,7 +277,7 @@ describe('member-api integration tests', () => {
                 .then(result => {
                     let { _id: groupId } = result.body;
                     return groupsService()
-                            .post(`/group/${groupId}/member`)
+                            .put(`/group/${groupId}/member`)
                             .send({ memberId });
                 })
                 .then(result => {
@@ -288,7 +288,7 @@ describe('member-api integration tests', () => {
                 .then(result => {
                     let { _id: groupId } = result.body;
                     return groupsService()
-                            .post(`/group/${groupId}/member`)
+                            .put(`/group/${groupId}/member`)
                             .send({ memberId });
                 })
                 .then(result => {

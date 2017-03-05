@@ -43,7 +43,7 @@ function startService() {
     app.get('/group/:groupId', groupAPI.findGroupById);
     app.get('/group/:groupId/events', groupAPI.getAllGroupEvents);
     app.get('/group/:groupId/posts', groupAPI.getAllGroupPosts);
-    app.post('/group/:groupId/member', groupAPI.addMemberToGroup);
+    app.put('/group/:groupId/member', groupAPI.addMemberToGroup);
     app.get('/group/', groupAPI.findGroupsByTags);
 
     // Event API
