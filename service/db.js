@@ -5,8 +5,6 @@ const mongoose = require('mongoose'),
 
 function connect() {
     return new Promise((resolve, reject) => {
-        // Set mongoose to use native Promises
-        mongoose.Promise = global.Promise;
 
         logger.info('Connecting to DB...');
         let connection = mongoose.connect(config.database.host).connection;
