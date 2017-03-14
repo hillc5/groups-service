@@ -49,6 +49,25 @@ function addMemberToGroup(req, res) {
         .catch(handleError(res));
 }
 
+function removeMemberFromGroup(req, res) {
+    const paramOptions = [ 'groupId', 'memberId'];
+
+    validateRequest({ req, paramOptions })
+        .then(() => {
+            const { groupId, memberId } = req.params;
+
+            return groupData.removeMemberFromGroup(groupId, memberId);
+        })
+        .then(result => {
+            if (result) {
+                res.status(200).send(result);
+            } else {
+                throw { status: 500, message: 'There was an error' }
+            }
+        })
+        .catch(handleError(res));
+}
+
 function findGroupById(req, res) {
     const paramOptions = [ 'groupId' ];
 
@@ -208,6 +227,7 @@ function findGroupsByTags(req, res) {
 module.exports = {
     createGroup,
     addMemberToGroup,
+    removeMemberFromGroup,
     findGroupById,
     getAllGroupEvents,
     getAllGroupPosts,

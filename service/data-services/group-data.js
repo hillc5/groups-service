@@ -30,9 +30,25 @@ function addMemberToGroup(groupId, memberId) {
             .then(() => {
                 const groupQuery = { _id: groupId },
                           update = { $addToSet: { members: memberId }},
-                          options = { new: true }
+                          options = { new: true };
 
                     return Group.findOneAndUpdate(groupQuery, update, options);
+            });
+}
+
+function removeMemberFromGroup(groupId, memberId) {
+    const entities = [
+        { type: 'member', id: memberId },
+        { type: 'group', id: groupId }
+    ];
+
+    return verifyEntitiesExist(entities)
+            .then(() => {
+                const groupQuery = { _id: groupId },
+                      update = { $pull: { members: memberId }},
+                      options = { new: true };
+
+                return Group.findOneAndUpdate(groupQuery, update, options);
             });
 }
 
@@ -58,6 +74,7 @@ function findGroup(query={}, fields='', refOptions=[]) {
 module.exports = {
     saveGroup,
     addMemberToGroup,
+    removeMemberFromGroup,
     findGroup,
     findGroups
 };

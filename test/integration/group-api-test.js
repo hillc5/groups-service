@@ -345,6 +345,142 @@ describe('group-api integration tests', () => {
         });
     });
 
+    describe('#removeMemberFromGroup', () => {
+        it('should return 400 if an invalid group id is given', done => {
+            const validMemberId = '585d851c1b865511bb0543d2';
+
+            groupsService()
+                .delete(`/group/wrongId/member/${validMemberId}`)
+                .then(respnose => {
+                    // Should fail if we hit here
+                    expect(false).to.be.true;
+                    done();
+                })
+                .catch(err => {
+                    const [ error ] = JSON.parse(err.response.text);
+                    expect(err.status).to.be.eql(400);
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('groupId');
+                    done();
+                });
+        });
+
+        it('should return 400 if an invalid member id is given', done => {
+            const validGroupId = '585d851c1b865511bb0543d2';
+
+            groupsService()
+                .delete(`/group/${validGroupId}/member/wrongId`)
+                .then(respnose => {
+                    // Should fail if we hit here
+                    expect(false).to.be.true;
+                    done();
+                })
+                .catch(err => {
+                    const [ error ] = JSON.parse(err.response.text);
+                    expect(err.status).to.be.eql(400);
+                    expect(error.parameter).to.not.be.undefined;
+                    expect(error.parameter).to.be.eql('memberId');
+                    done();
+                });
+        });
+
+        it('should return 404 if the group does not exist for the given groupId', done => {
+            const missingGroupId = '585d851c1b865511bb0543d2';
+
+            saveTestMember()
+                .then(member => {
+                    return groupsService()
+                            .delete(`/group/${missingGroupId}/member/${member._id}`)
+                })
+                .then(respnose => {
+                    // Should fail if we hit here
+                    expect(false).to.be.true;
+                    done();
+                })
+                .catch(err => {
+                    const [ error ] = JSON.parse(err.response.text);
+                    expect(err.status).to.be.eql(404);
+                    expect(error.message).to.be.eql(`No group found for ${missingGroupId}`);
+                    done();
+                });
+        });
+
+        it('should return 404 if the member does not exist for the given memberId', done => {
+            const missingMemberId = '585d851c1b865511bb0543d2';
+
+            saveTestGroup()
+                .then(group => {
+                    return groupsService()
+                            .delete(`/group/${group._id}/member/${missingMemberId}`)
+                })
+                .then(respnose => {
+                    // Should fail if we hit here
+                    expect(false).to.be.true;
+                    done();
+                })
+                .catch(err => {
+                    const [ error ] = JSON.parse(err.response.text);
+                    expect(err.status).to.be.eql(404);
+                    expect(error.message).to.be.eql(`No member found for ${missingMemberId}`);
+                    done();
+                });
+        });
+
+        it('should return 200 for a successful delete', done => {
+            let memberId, groupId;
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+
+                    return saveTestGroup();
+                })
+                .then(group => {
+                    groupId = group._id;
+                    return groupsService()
+                            .put(`/group/${groupId}/member`)
+                            .send({ memberId });
+                })
+                .then(() => {
+                    return groupsService()
+                            .delete(`/group/${groupId}/member/${memberId}`);
+                })
+                .then(result => {
+                    expect(result.status).to.be.eql(200);
+                    done();
+                });
+        });
+
+        it('should return the group with the member removed from the members array', done => {
+            let memberId, groupId;
+
+            saveTestMember()
+                .then(member => {
+                    memberId = member._id;
+
+                    return saveTestGroup();
+                })
+                .then(group => {
+                    groupId = group._id;
+                    return groupsService()
+                            .put(`/group/${groupId}/member`)
+                            .send({ memberId });
+                })
+                .then(result => {
+                    const { members } = result.body;
+                    expect(members).to.contain(memberId);
+                    return groupsService()
+                            .delete(`/group/${groupId}/member/${memberId}`);
+                })
+                .then(result => {
+                    const { members } = result.body
+                    expect(result.status).to.be.eql(200);
+                    expect(members).to.not.contain(memberId);
+                    done();
+                });
+        });
+    })
+
     describe('#findGroupById', () => {
         it('should return 400 if an invalid group id is given', done => {
             groupsService()

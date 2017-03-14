@@ -44,6 +44,7 @@ function startService() {
     app.get('/group/:groupId/events', groupAPI.getAllGroupEvents);
     app.get('/group/:groupId/posts', groupAPI.getAllGroupPosts);
     app.put('/group/:groupId/member', groupAPI.addMemberToGroup);
+    app.delete('/group/:groupId/member/:memberId', groupAPI.removeMemberFromGroup);
     app.get('/group/', groupAPI.findGroupsByTags);
 
     // Event API
